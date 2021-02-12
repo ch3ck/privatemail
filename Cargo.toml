@@ -1,0 +1,24 @@
+[package]
+name        = "peppersoup"
+description = ""
+version     = "0.1.0"
+authors     = ["Nyah Check <nyah@cawlo.com>"]
+license     = ""
+homepage    = "https://github.com/yasufe"
+repository  = "https://github.com/yasufe/peppersoup"
+readme      = "README.md"
+categories  = ["development-tools"]
+keywords    = ["cargo", "security", "rust"]
+edition     = "2018"
+
+[profile.release]
+overflow-checks = true
+panic 			= "abort"
+lto 			= true
+
+[dependencies]
+clippy = {version = "0.0.21", optional = true}
+
+[features]
+default = []
+dev = ["clippy"]
