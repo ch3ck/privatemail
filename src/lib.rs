@@ -1,7 +1,5 @@
 #![allow(clippy::style)]
 
-pub mod config;
-
 #[macro_use]
 extern crate diesel;
 extern crate dropshot;
