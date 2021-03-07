@@ -1,14 +1,14 @@
 [package]
-name        = "peppersoup"
-description = ""
-version     = "0.1.0"
-authors     = ["Nyah Check <nyah@cawlo.com>"]
-license     = ""
-homepage    = "https://github.com/yasufe"
-repository  = "https://github.com/yasufe/peppersoup"
+name        = "privatemail"
+description = "Service to forward custom emails to personal email server"
+version     = "1.0.0"
+authors     = ["Nyah Check <hello@nyah.dev>"]
+license     = "MIT"
+homepage    = "https://github.com/ch3ck"
+repository  = "https://github.com/ch3ck/privatemail"
 readme      = "README.md"
-categories  = ["development-tools"]
-keywords    = ["cargo", "security", "rust"]
+categories  = ["email-service"]
+keywords    = ["lambda", "aws", "email", "security", "rust"]
 edition     = "2018"
 
 [profile.release]
@@ -17,8 +17,4 @@ panic 			= "abort"
 lto 			= true
 
 [dependencies]
-clippy = {version = "0.0.21", optional = true}
-
-[features]
-default = []
-dev = ["clippy"]
+clippy = "0.0.21"
