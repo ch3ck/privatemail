@@ -1,9 +1,9 @@
 #![allow(clippy::style)]
+use std::collections::HashMap;
 
-#[macro_use]
-extern crate diesel;
-extern crate dropshot;
-extern crate serde_json;
+use serde::de::DeserializeOwned;
+use serde::Serialize;
+use serde_json;
 
 /** Test module for privatemail package */
 #[cfg(test)]
