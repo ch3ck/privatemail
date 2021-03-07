@@ -1,13 +1,17 @@
-name: Actions
+# GitHub Actions workflow to deploy Lambda functions with RUST runtime
+# Author: Nyah Check
+
+name: Rust
 
 on:
   push:
-    paths: 
-      - '**/Cargo.toml'
-      - '**/Cargo.lock'
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
 
 jobs:
-  security_audit:
+  run-security_audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -16,7 +20,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run code audit
         run: cargo audit
-  build:
+      - name: Check style
+        run: cargo +nightly fmt --check
+  build-and-test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -27,6 +33,6 @@ jobs:
       with:
         rust-version: ${{ matrix.rust }}
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --tests --verbose
     - name: Run tests
       run: cargo test --verbose
