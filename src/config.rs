@@ -47,18 +47,19 @@ pub struct EmailConfig {
     /**  Enables support for plus(+) sign suffixes on email addresses */
     pub allow_plus: bool,
     /** email_mapping: Dictionary mapping showing where to forward the emails */
-    pub email_mapping: HashMap<&str, &str>,
+    pub email_mapping: HashMap<String, String>,
 }
 
 impl Default for EmailConfig {
     fn default() -> Self {
         let mut email_map: HashMap<&str, &str> = HashMap::with_capacity(1);
-        email_map.insert("@nyah.dev", "nyah@hey.com");
+        email_map
+            .insert(String::from("@nyah.dev"), String::from("nyah@hey.com"));
 
         EmailConfig {
             from_email: String::from("hello@nyah.dev"),
             subject_prefix: String::from(""),
-            email_bucket: String::from("ses-emails"),
+            email_bucket: String::from("nyah-ses-emails"),
             email_key_prefix: String::from("nyah/"),
             allow_plus: true,
             email_mapping: email_map,
