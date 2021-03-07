@@ -13,8 +13,3 @@ build
 
 # Editor configs
 .idea/
-
-# python configs
-*.iml
-__pycache__
-*.pyc
