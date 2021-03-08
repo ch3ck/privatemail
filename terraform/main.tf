@@ -12,7 +12,7 @@ terraform {
     }
   }
   backend "remote" {
-    organization = "nyah.dev"
+    organization = "nyahdev"
     workspaces {
       name = "nyah-dot-dev-workspace"
     }
@@ -29,7 +29,7 @@ resource "aws_s3_bucket" "ses-bucket" {
   }
 
   versioning {
-    enable = true
+    enabled = true
   }
 }
 
@@ -74,4 +74,24 @@ resource "aws_iam_role" "ses-email-role" {
   name                = "ses-email-forward-lambda-invoke-role"
   assume_role_policy  = data.aws_iam_policy_document.ses_email_forward_policy_document.json
   managed_policy_arns = [aws_iam_policy.ses-email-policy.arn]
+}
+
+resource "aws_sns_topic" "ses-email-topic" {
+  name            = "ses-email-forward-sns-topic"
+  delivery_policy = <<EOF
+{
+  "http": {
+    "defaultHealthyRetryPolicy": {
+      "minDelayTarget": 20,
+      "maxDelayTarget": 20,
+      "numRetries": 3,
+      "numMaxDelayRetries": 0,
+      "numNoDelayRetries": 0,
+      "numMinDelayRetries": 0,
+      "backoffFunction": "linear"
+    },
+    "disableSubscriptionOverrides": false
+  }
+}
+EOF
 }
