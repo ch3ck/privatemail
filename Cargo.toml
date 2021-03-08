@@ -7,9 +7,11 @@ license     = "MIT"
 homepage    = "https://github.com/ch3ck"
 repository  = "https://github.com/ch3ck/privatemail"
 readme      = "README.md"
-categories  = ["email-service"]
+categories  = ["email", "ses", "email-server"]
 keywords    = ["lambda", "aws", "email", "security", "rust"]
 edition     = "2018"
+documentation = "https://docs.rs/privatemail"
+
 
 [profile.release]
 overflow-checks = true
