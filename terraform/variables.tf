@@ -16,6 +16,14 @@ variable "topic" {
   description = "SES email forwarding sns topic"
 }
 
+variable "from_email" {
+  default     = "hello@nyah.dev"
+}
+
+variable "to_email" {
+  default     = "nyah@hey.com"
+}
+
 variable "region" {
   default = "us-east-1"
 }

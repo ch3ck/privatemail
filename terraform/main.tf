@@ -12,9 +12,9 @@ terraform {
     }
   }
   backend "remote" {
-    organization = var.organization
+    organization = "nyahdev"
     workspaces {
-      name = var.workspace
+      name = "nyah-dot-dev-workspace"
     }
   }
 }
@@ -110,17 +110,19 @@ EOF
 }
 
 resource "aws_lambda_function" "ses-email-forward-lambda" {
-  filename      = "example/lambda.zip"
+  filename      = "lambda.zip"
   function_name = var.function_name
   role          = aws_iam_role.ses-email-role
   handler       = "privatemail_handler"
 
-  source_code_hash = filebase64sha256("example/lambda.zip")
+  source_code_hash = filebase64sha256("lambda.zip")
   runtime          = "provided"
 
   environment {
     variables = {
-      RUST_BACKTRACE = 1
+      RUST_BACKTRACE = 1,
+      FROM_EMAIL= var.from_email,
+      TO_EMAIL = var.to_email
     }
   }
 }
