@@ -18,10 +18,10 @@ jobs:
       - uses: actions-rs/audit-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run code audit
+      - name: Run code audit fix
         run: cargo audit
       - name: Check style
-        run: cargo +nightly fmt --check
+        run: cargo +nightly fmt
   build-and-test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -36,29 +36,3 @@ jobs:
       run: cargo build --tests --verbose
     - name: Run tests
       run: cargo test --verbose
-  build-and-release:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        rust-version: stable
-    - name: Build for release
-      run: |
-        rustup target add x86_64-unknown-linux-musl
-        cargo build --release --target x86_64-unknown-linux-musl
-        zip -j lambda.zip ./target/x86_64-unknown-linux-musl/release/bootstrap
-    - name: Deploy Lambda
-      if: github.ref == 'refs/heads/master'
-      uses: appleboy/lambda-action@master
-      with:
-        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws_region: ${{ secrets.AWS_REGION }}
-        function_name: ${{ secrets.LAMBDA_NAME }}
-        zip_file: lambda.zip
-        memory_size: 128
-        timeout: 30
-        handler: privatemail_handler
-        role: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/ses-email-forward-lambda-invoke-role
-        runtime: provided
-        environment: RUST_BACKTRACE=1,FROM_EMAIL=${{secrets.FROM_EMAIL}},TO_EMAIL=${{secrets.TO_EMAIL}}
