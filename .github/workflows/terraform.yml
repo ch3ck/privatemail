@@ -18,25 +18,27 @@ jobs:
           rust-version: stable
       - name: Build for release
         run: |
-          cargo build -p lambda_runtime --example privatemail --release
-          cp ./target/release/examples/privatemail ./bootstrap && zip lambda.zip bootstrap && rm bootstrap
+          rustup target add x86_64-unknown-linux-musl
+          cargo build --release --target x86_64-unknown-linux-musl
+          zip -j lambda.zip ./target/x86_64-unknown-linux-musl/release/bootstrap
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
       - name: Terraform Format
         id: fmt
-        run: terraform fmt -check -chdir=terraform
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -json -chdir=terraform
+        run: terraform fmt -check terraform
       - name: Terraform init
         id: init
-        run: terraform init -chdir=terraform
+        run: terraform init terraform
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -json terraform
+      
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
-        run: terraform plan -no-color -chdir=terraform
+        run: terraform plan -no-color terraform
         continue-on-error: true
       - name: Update Pull Request
         uses: actions/github-script@0.9.0
@@ -65,4 +67,4 @@ jobs:
         run: exit 1
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-        run: terraform apply -auto-approve -chdir=terraform
+        run: terraform apply -auto-approve terraform
