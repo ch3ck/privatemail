@@ -44,8 +44,9 @@ jobs:
         rust-version: stable
     - name: Build for release
       run: |
-        cargo build -p lambda_runtime --example privatemail --release
-        cp ./target/release/examples/privatemail ./bootstrap && zip lambda.zip bootstrap && rm bootstrap
+        rustup target add x86_64-unknown-linux-musl
+        cargo build --release --target x86_64-unknown-linux-musl
+        zip -j lambda.zip ./target/x86_64-unknown-linux-musl/release/bootstrap
     - name: Deploy Lambda
       if: github.ref == 'refs/heads/master'
       uses: appleboy/lambda-action@master
@@ -54,7 +55,7 @@ jobs:
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws_region: ${{ secrets.AWS_REGION }}
         function_name: ${{ secrets.LAMBDA_NAME }}
-        zip_file: example/lambda.zip
+        zip_file: lambda.zip
         memory_size: 128
         timeout: 30
         handler: privatemail_handler
