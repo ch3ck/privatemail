@@ -6,63 +6,63 @@ use serde::Serialize;
 use std::collections::HashMap;
 
 /**
- * Configuration for a PrivatEmail server for SES.
+ * Config object for PrivatEmail.
  *
- * This type implements [`serde::Deserialize`] and [`serde::Serialize`] and it
- * can be composed with the consumer's configuration (whatever format that's
- * in).  For example, consumers could define a custom `AppConfig` for an app
- * that contains uses PrivatEmail server:
+ * Implements [`serde::Deserialize`] and [`serde::Serialize`] and
+ * can be composed with other consumer configs.
+ * Example:
+ *  Here is a custom `PrivatEmailConfig` for an application
  *
  * ```
- * use privatemail::EmailConfig;
+ * use privatemail::PrivatEmailConfig;
  * use serde::Deserialize;
  *
  * #[derive(Deserialize)]
- * struct AppConfig {
- *     email_server: EmailConfig,
- *     /* other app related configs */
+ * struct PrivatEmailConfig {
+ *     privatemail_config: PrivatEmailConfig,
+ *     /* other application related configs */
  * }
  *
  * fn main() -> Result<(), String> {
- *     let my_config: EmailConfig = toml::from_str(
+ *     let my_privatemail_config: PrivatEmailConfig = toml::from_str(
  *         r##"
- *             [email_server]
+ *              [email_server]
+ *              from_email = "doe.example"
+ *              to_email   = "recipient@mail.box"
+ *              
  *
  *             ## ... (other app-specific config)
  *         "##
  *     ).map_err(|error| format!("parsing server config: {}", error))?;
+ * 
+ *    let mail_config: &PrivatEmailConfig = &my_privatemail_config.from_email;
+ *    /** privatemail_handler(mail_config) */
+ *    Ok(())
  * ```
  */
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(default)]
-pub struct EmailConfig {
+pub struct PrivatEmailConfig {
     /** Forwarded emails will be received from this SES verified email address */
     pub from_email: String,
+    /** Recipient email address that receives the forwarded SES email */
+    pub to_email: String,
     /** Forwarded emails subject will contain this prefix */
     pub subject_prefix: String,
     /** S3 bucket to store raw SES emails */
     pub email_bucket: String,
     /** S3 key prefix where SES stores emails */
     pub email_key_prefix: String,
-    /**  Enables support for plus(+) sign suffixes on email addresses */
-    pub allow_plus: bool,
-    /** email_mapping: Dictionary mapping showing where to forward the emails */
-    pub email_mapping: HashMap<String, String>,
 }
 
-impl Default for EmailConfig {
+impl Default for PrivatEmailConfig {
     fn default() -> Self {
-        let mut email_map: HashMap<&str, &str> = HashMap::with_capacity(1);
-        email_map
-            .insert(String::from("@nyah.dev"), String::from("nyah@hey.com"));
-
-        EmailConfig {
-            from_email: String::from("hello@nyah.dev"),
-            subject_prefix: String::from(""),
-            email_bucket: String::from("nyah-ses-emails"),
-            email_key_prefix: String::from("nyah/"),
-            allow_plus: true,
-            email_mapping: email_map,
+        PrivatEmailConfig {
+            from_email: String::from("nyah.dev"),
+            to_email: String::from("nyah@hey.com"),
+            subject_prefix: String::from("PrivateMail: "), // not currently used
+            email_bucket: String::from("nyah-ses-emails"), // not currently used
+            email_key_prefix: String::from("nyah/"), // not currently used
         }
     }
 }
