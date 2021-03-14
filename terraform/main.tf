@@ -20,8 +20,8 @@ terraform {
 }
 
 resource "aws_s3_bucket" "ses-bucket" {
-  bucket = var.bucket
-  force_destroy = true 
+  bucket        = var.bucket
+  force_destroy = true
 
   tags = {
     Name        = var.bucket
@@ -33,8 +33,22 @@ resource "aws_s3_bucket" "ses-bucket" {
   }
 }
 
-
-
+resource "aws_s3_bucket_policy" "ses-bucket" {
+  bucket = aws_s3_bucket.ses-bucket.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Id      = "SESBucketPolicy"
+    Statement = [
+      {
+        Sid       = "SesWriteToBucket"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "s3:PutObject"
+        Resource  = ["${aws_s3_bucket.ses-bucket.arn}/*"]
+      },
+    ]
+  })
+}
 
 data "aws_iam_policy_document" "ses_email_forward_policy_document" {
   statement {
@@ -212,9 +226,4 @@ resource "aws_ses_receipt_rule" "ses_rule" {
     topic_arn       = aws_sns_topic.ses-email-topic.arn
     position        = 3
   }
-
-  depends = [
-    aws_ses_receipt_rule_set.ses_rule,
-    aws_s3_bucket_policy.
-  ]
 }
