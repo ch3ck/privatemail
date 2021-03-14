@@ -22,34 +22,32 @@
 //!                 "sender": ["recipient", "emails"]
 //!                To match all email addresses on a domain, use a key without the name part of an email address( `@example.com`)
 //!                To match a mailbox on all domains, use a key without the `@` symbol e.g (`info`, 'admin')
-mod config;
-mod lib;
-use std::env;
-use std::error::Error;
-
 use lambda_runtime::{error::HandlerError, lambda, Context};
-use lib::{LambdaRequest, LambdaResponse};
-use log::{self, error};
-use rand::prelude::*;
 use serde_derive::{Deserialize, Serialize};
 use simple_error::bail;
-use simple_logger;
 
-fn main() -> Result<(), Box<dyn Error>> {
-    simple_logger::init_with_level(log::Level::Debug)?;
-    lambda!(my_handler);
+#[derive(Deserialize, Clone)]
+struct CustomEvent {
+    first_name: String,
+    last_name: String,
+}
 
-    Ok(())
+#[derive(Serialize, Clone)]
+struct CustomOutput {
+    message: String,
+}
+
+fn main() {
+    lambda!(privatemail_handler);
 }
 
 fn privatemail_handler(
-    e: LambdaEvent,
-    c: Context,
-) -> Result<LambdaResponse, HandlerError> {
-    if e.request_id == "" {
-        error!("Empty request_id in request {}", c.aws_request_id);
+    e: CustomEvent,
+    ctx: Context,
+) -> Result<CustomOutput, HandlerError> {
+    println!("Event: {}, Context: {}", e.first_name, ctx.aws_request_id);
+    if e.first_name == "" {
         bail!("Empty first name");
     }
-
     Ok(CustomOutput { message: format!("Hello, {}!", e.first_name) })
 }

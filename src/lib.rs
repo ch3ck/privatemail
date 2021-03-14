@@ -1,9 +1,8 @@
 #![allow(clippy::style)]
-use std::collections::HashMap;
-
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json;
+use std::collections::HashMap;
 
 /** Test module for privatemail package */
 #[cfg(test)]
@@ -73,12 +72,12 @@ impl LambdaResponse {
         self
     }
 
-    pub fn build(self) -> LambdaResponse {
-        LambdaReponse {
-            is_base_64_encoded: false,
-            status_code: self.status_code,
-            headers: self.headers,
-            body: self.body,
-        }
-    }
+    // pub fn build(self) -> LambdaResponse {
+    //     LambdaReponse {
+    //         is_base_64_encoded: false,
+    //         status_code: self.status_code,
+    //         headers: self.headers,
+    //         body: self.body,
+    //     }
+    // }
 }
