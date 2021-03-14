@@ -210,22 +210,16 @@ resource "aws_ses_receipt_rule" "ses_rule" {
   scan_enabled  = true
   enabled       = true
 
-  s3_action {
-    bucket_name       = aws_s3_bucket.ses-bucket.bucket
-    object_key_prefix = var.domain_name
-    topic_arn         = aws_sns_topic.ses-email-topic.arn
-    position          = 1
-  }
 
   sns_action {
     topic_arn = aws_sns_topic.ses-email-topic.arn
-    position  = 2
+    position  = 1
   }
 
   lambda_action {
     function_arn    = aws_lambda_function.ses-email-forward-lambda.arn
     invocation_type = "Event"
     topic_arn       = aws_sns_topic.ses-email-topic.arn
-    position        = 3
+    position        = 2
   }
 }
