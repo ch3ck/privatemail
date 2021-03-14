@@ -38,13 +38,12 @@ data "aws_iam_policy_document" "ses_email_forward_policy_document" {
     sid = "1"
 
     actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
+      "ses:SendEmail",
+      "ses:SendRawEmail",
     ]
 
     resources = [
-      "arn:aws:logs:*:*:*",
+      "*"
     ]
   }
 
@@ -52,12 +51,13 @@ data "aws_iam_policy_document" "ses_email_forward_policy_document" {
     sid = "2"
 
     actions = [
-      "ses:SendEmail",
-      "ses:SendRawEmail",
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
     ]
 
     resources = [
-      "*"
+      "arn:aws:logs:*:*:*",
     ]
   }
 }
