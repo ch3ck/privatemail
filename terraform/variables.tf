@@ -37,3 +37,15 @@ variable "workspace" {
   default     = "nyah-dot-dev-workspace"
   description = "Terraform cloud workspace name"
 }
+
+variable "rule_set_name" {
+  default = "ses-forward-rule-set-nyah"
+}
+
+variable "rule_name" {
+  default = "ses-forward-rule-nyah"
+}
+
+variable "domain_name" {
+  default = "nyah.dev"
+}
