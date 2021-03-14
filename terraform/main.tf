@@ -21,7 +21,7 @@ terraform {
 
 resource "aws_s3_bucket" "ses-bucket" {
   bucket = var.bucket
-  acl    = "private"
+  force_destroy = true 
 
   tags = {
     Name        = var.bucket
@@ -32,6 +32,9 @@ resource "aws_s3_bucket" "ses-bucket" {
     enabled = true
   }
 }
+
+
+
 
 data "aws_iam_policy_document" "ses_email_forward_policy_document" {
   statement {
@@ -176,4 +179,42 @@ resource "aws_sns_topic_subscription" "lambda_subscription" {
   topic_arn = aws_sns_topic.ses-email-topic.arn
   protocol  = "lambda"
   endpoint  = aws_lambda_function.ses-email-forward-lambda.arn
+}
+
+resource "aws_ses_receipt_rule_set" "ses_rule" {
+  rule_set_name = var.rule_set_name
+}
+
+resource "aws_ses_active_receipt_rule_set" "ses_rule" {
+  rule_set_name = aws_ses_receipt_rule_set.ses_rule.rule_set_name
+}
+
+resource "aws_ses_receipt_rule" "ses_rule" {
+  name          = var.rule_name
+  rule_set_name = aws_ses_receipt_rule_set.ses_rule.rule_set_name
+  recipients    = [var.domain_name]
+  scan_enabled  = true
+  enabled       = true
+
+  s3_action {
+    bucket_name = aws_s3_bucket.ses-bucket.bucket
+    position    = 1
+  }
+
+  sns_action {
+    topic_arn = aws_sns_topic.ses-email-topic.arn
+    position  = 2
+  }
+
+  lambda_action {
+    function_arn    = aws_lambda_function.ses-email-forward-lambda.arn
+    invocation_type = "Event"
+    topic_arn       = aws_sns_topic.ses-email-topic.arn
+    position        = 3
+  }
+
+  depends = [
+    aws_ses_receipt_rule_set.ses_rule,
+    aws_s3_bucket_policy.
+  ]
 }
