@@ -16,7 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Run code audit
-        run: cargo audit fix
+        run: |
+          cargo install cargo-audit --features=fix
+          cargo audit fix
       - name: Check style
         run: cargo +nightly fmt
   build-and-test:
