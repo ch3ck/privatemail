@@ -1,5 +1,12 @@
 # privatemail
 
+[![forthebadge](https://forthebadge.com/images/badges/powered-by-black-magic.svg)](https://github.com/ch3ck/privatemail)
+[![forthebadge](https://forthebadge.com/images/badges/made-with-rust.svg)](https://github.com/ch3ck/privatemail)
+[![forthebadge](https://forthebadge.com/images/badges/fuck-it-ship-it.svg)](https://github.com/ch3ck/privatemail)
+[![Rust](https://github.com/ch3ck/privatemail/actions/workflows/rust.yml/badge.svg?branch=master)](https://github.com/ch3ck/privatemail/actions/workflows/rust.yml)
+[![Terraform](https://github.com/ch3ck/privatemail/actions/workflows/terraform.yml/badge.svg?branch=master)](https://github.com/ch3ck/privatemail/actions/workflows/terraform.yml)
+
+
 Forward emails from SES to private email server
 
 
