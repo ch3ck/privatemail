@@ -1,4 +1,25 @@
-#![allow(clippy::style)]
+//!
+//! A rust library for handling SNS requests to Lambda.
+//!
+//!
+//! Example:
+//!
+//! ```
+//! use privatemail::PrivatEmailConfig;
+//! use serde::{Deserialize, Serialize};
+//!
+//! async fn privatemail_handler() {
+//!     // Initialize PrivatEmailConfig object.
+//!     let email_config = PrivatEmailConfig::default();
+//!
+//!     // Get email recipient and process incoming mail
+//!     ...
+//!
+//!     // Forward to recipent
+//!     ...
+//! }
+//! ```
+#![allow(clippy::field_reassign_with_default)]
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json;
@@ -19,6 +40,7 @@ mod tests {
 #[derive(Serialize, Debug)]
 pub struct LambdaRequest<Data: DeserializeOwned> {
     #[serde(deserialize_with = "deserialize")]
+    /** lambda request body */
     body: Data,
 }
 
@@ -28,56 +50,36 @@ impl<Data: DeserializeOwned> LambdaRequest<Data> {
     }
 }
 
-//
-// LambdaResponse: The Outgoing response being passed by the Lambda
-//
+/// LambdaResponse: The Outgoing response being passed by the Lambda
 #[derive(Serialize, Debug)]
 pub struct LambdaResponse {
     #[serde(rename = "isBase64Encoded")]
+    /** is_base_64_encoded response field */
     is_base_64_encoded: bool,
 
     #[serde(rename = "statusCode")]
+    /** status_code for lambda response */
     status_code: u32,
 
+    /** response headers for lambda response */
     headers: HashMap<String, String>,
+    /** response body for LambdaResponse struct */
     body: String,
 }
 
 impl LambdaResponse {
-    pub fn new() -> Self {
+    /**
+     *  Given a status_code and response body a new LambdaResponse
+     *  is returned to the calling function
+     * */
+    pub fn new(status_code: u32, body: String) -> Self {
+        let mut header = HashMap::new();
+        header.insert("content-type".to_owned(), "application/json".to_owned());
         LambdaResponse {
             is_base_64_encoded: false,
-            status_code: 200,
-            headers: HashMap::new(),
-            body: "".to_owned(),
+            status_code,
+            headers: header,
+            body: serde_json::to_string(&body).unwrap(),
         }
     }
-
-    pub fn with_status(mut self, code: u32) -> Self {
-        self.status_code = code;
-        self
-    }
-
-    pub fn with_header<S: Into<String>>(mut self, name: S, value: S) -> Self {
-        self.headers.insert(name.into().to_ascii_lowercase(), value.into());
-        self
-    }
-
-    pub fn with_json<D: Serialize>(mut self, data: D) -> Self {
-        self.headers
-            .entry("content-type".to_owned())
-            .or_insert_with(|| "application/json".to_owned());
-
-        self.body = serde_json::to_string(&data).unwrap();
-        self
-    }
-
-    // pub fn build(self) -> LambdaResponse {
-    //     LambdaReponse {
-    //         is_base_64_encoded: false,
-    //         status_code: self.status_code,
-    //         headers: self.headers,
-    //         body: self.body,
-    //     }
-    // }
 }
