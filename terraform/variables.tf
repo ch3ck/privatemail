@@ -17,11 +17,11 @@ variable "topic" {
 }
 
 variable "from_email" {
-  default     = "hello@nyah.dev"
+  default = "hello@nyah.dev"
 }
 
 variable "to_email" {
-  default     = "nyah@hey.com"
+  default = "nyah@hey.com"
 }
 
 variable "region" {
