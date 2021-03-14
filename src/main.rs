@@ -22,32 +22,45 @@
 //!                 "sender": ["recipient", "emails"]
 //!                To match all email addresses on a domain, use a key without the name part of an email address( `@example.com`)
 //!                To match a mailbox on all domains, use a key without the `@` symbol e.g (`info`, 'admin')
-use lambda_runtime::{error::HandlerError, lambda, Context};
-use serde_derive::{Deserialize, Serialize};
-use simple_error::bail;
+use lambda_runtime::{handler_fn, Context, Error};
+use tracing::log::LevelFilter;
+use serde::{Deserialize, Serialize};
+use simple_logger::SimpleLogger;
 
-#[derive(Deserialize, Clone)]
-struct CustomEvent {
-    first_name: String,
-    last_name: String,
+
+#[derive(Deserialize)]
+struct Request {
+    command: String,
 }
 
-#[derive(Serialize, Clone)]
-struct CustomOutput {
-    message: String,
+
+#[derive(Serialize)]
+struct Response {
+    req_id: String,
+    msg: String,
 }
 
-fn main() {
-    lambda!(privatemail_handler);
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    // required to enable CloudWatch error logging by the runtime
+    // can be replaced with any other method of initializing `log`
+    SimpleLogger::new().with_level(LevelFilter::Info).init().unwrap();
+
+    let func = handler_fn(my_handler);
+    lambda_runtime::run(func).await?;
+    Ok(())
 }
 
-fn privatemail_handler(
-    e: CustomEvent,
-    ctx: Context,
-) -> Result<CustomOutput, HandlerError> {
-    println!("Event: {}, Context: {}", e.first_name, ctx.aws_request_id);
-    if e.first_name == "" {
-        bail!("Empty first name");
-    }
-    Ok(CustomOutput { message: format!("Hello, {}!", e.first_name) })
+pub(crate) async fn my_handler(event: Request, ctx: Context) -> Result<Response, Error> {
+    // extract some useful info from the request
+    let command = event.command;
+
+    // prepare the response
+    let resp = Response {
+        req_id: ctx.request_id,
+        msg: format!("Command {} executed.", command),
+    };
+
+    // return `Response` (it will be serialized to JSON automatically by the runtime)
+    Ok(resp)
 }
