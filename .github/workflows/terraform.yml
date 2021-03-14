@@ -26,26 +26,20 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-          tf_actions_working_dir: "terraform"
         env:
           TF_VAR_from_email: ${{ secrets.TO_EMAIL }}
           TF_VAR_to_email: ${{ secrets.FROM_EMAIL }}
       - name: Terraform Format
         id: fmt
-        run: terraform fmt -check
+        run: terraform fmt -check terraform
       - name: Terraform init
         id: init
-        run: terraform init
+        run: terraform init terraform
       - name: Terraform Validate
         id: validate
-        run: terraform validate -json
+        run: terraform validate -json terraform
       - name: Terraform Plan
-        id: plan
-        run: terraform plan
-        continue-on-error: true
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
+        run: terraform plan terraform
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-        run: terraform apply
+        run: terraform apply terraform
