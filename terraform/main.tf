@@ -33,7 +33,6 @@ resource "aws_s3_bucket" "ses-bucket" {
   }
 }
 
-
 data "aws_iam_policy_document" "ses_email_forward_policy_document" {
   statement {
     sid = "1"
@@ -61,19 +60,6 @@ data "aws_iam_policy_document" "ses_email_forward_policy_document" {
       "*"
     ]
   }
-
-  statement {
-    sid = "3"
-
-    actions = [
-      "sts:AssumeRole",
-    ]
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
 }
 
 resource "aws_iam_policy" "ses-email-policy" {
@@ -82,10 +68,22 @@ resource "aws_iam_policy" "ses-email-policy" {
   policy = data.aws_iam_policy_document.ses_email_forward_policy_document.json
 }
 
+data "aws_iam_policy_document" "ses_email_assume_role_document" {
+  statement {
+    sid = "3"
+
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
 
 resource "aws_iam_role" "ses-email-role" {
   name                = "ses-email-forward-lambda-invoke-role"
-  assume_role_policy  = data.aws_iam_policy_document.ses_email_forward_policy_document.json
+  assume_role_policy  = data.aws_iam_policy_document.ses_email_assume_role_document.json
   managed_policy_arns = [aws_iam_policy.ses-email-policy.arn]
 }
 
