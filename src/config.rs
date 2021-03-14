@@ -3,9 +3,8 @@
 //! Application-specific configuration for PrivatEmail
 
 #![allow(clippy::style)]
-use serde::Deserialize;
-use serde::Serialize;
-use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
+use std::env;
 
 /**
  * Config object for PrivatEmail.
@@ -36,7 +35,7 @@ use std::collections::HashMap;
  *             ## ... (other app-specific config)
  *         "##
  *     ).map_err(|error| format!("parsing server config: {}", error))?;
- * 
+ *
  *    let mail_config: &PrivatEmailConfig = &my_privatemail_config.from_email;
  *    /** privatemail_handler(mail_config) */
  *    Ok(())
@@ -46,57 +45,63 @@ use std::collections::HashMap;
 #[serde(default)]
 pub struct PrivatEmailConfig {
     /** Forwarded emails will be received from this SES verified email address */
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub from_email: String,
     /** Recipient email address that receives the forwarded SES email */
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub to_email: String,
     /** Forwarded emails subject will contain this prefix */
-    pub subject_prefix: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subject_prefix: Option<String>,
     /** S3 bucket to store raw SES emails */
-    pub email_bucket: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email_bucket: Option<String>,
     /** S3 key prefix where SES stores emails */
-    pub email_key_prefix: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email_key_prefix: Option<String>,
+}
+
+/// Create default method for PrivatEmailConfig struct
+impl Default for PrivatEmailConfig {
+    fn default() -> Self {
+        PrivatEmailConfig {
+            from_email: String::from("nyah.dev"),
+            to_email: String::from("nyah@hey.com"),
+            subject_prefix: None, // not currently used
+            email_bucket: None,
+            email_key_prefix: None,
+        }
+    }
 }
 
 /// Create a new PrivatEmailConfig client struct from environment variables.
 impl PrivatEmailConfig {
-
-    /// Create default method for PrivatEmailConfig struct
-    pub fn default() -> Self {
-        PrivatEmailConfig {
-            from_email: String::from("nyah.dev"),
-            to_email: String::from("nyah@hey.com"),
-            subject_prefix: String::from("PrivateMail: "), // not currently used
-            email_bucket: String::from("nyah-ses-emails"), // not currently used
-            email_key_prefix: String::from("nyah/"), // not currently used
-        }
-    }
-
     /// Create new PrivatEmailConfig struct from environment variables.
     /// As long as you have the `from_email` and `to_email` environment setup; this should work
     pub fn new_from_env() -> Self {
         PrivatEmailConfig {
             from_email: env::var("from_email").unwrap(),
             to_email: env::var("to_email").unwrap(),
-            subject_prefix: env::var("subject_prefix").unwrap_or_default(),
-            email_bucket: env::var("email_bucket").unwrap_or_default(),
-            email_key_prefix: env::var("email_key_prefix").unwrap_or_default(),
+            subject_prefix: Some(String::from("PrivateMail: ")), // not currently used
+            email_bucket: None,
+            email_key_prefix: None,
         }
     }
 
     /// Create a new PrivatEmailConfig struct.PrivatEmailConfig
     /// You can leave the s3 bucket related fields empty since it's not currently being used
-    pub fn new<T, T, S>(from_email: F, to_email: T, subject_prefix: S) -> Self
+    pub fn new<F, T, S>(from_email: F, to_email: T, subject_prefix: S) -> Self
     where
-        T: ToString,
+        F: ToString,
         T: ToString,
         S: ToString,
     {
         PrivatEmailConfig {
-            from_email: from_email,
-            to_email: to_email,
-            subject_prefix: subject_prefix,
-            email_bucket: String::from(""),
-            email_key_prefix: String::from(""),
+            from_email: from_email.to_string(),
+            to_email: to_email.to_string(),
+            subject_prefix: Some(subject_prefix.to_string()),
+            email_bucket: None,
+            email_key_prefix: None,
         }
     }
 }
