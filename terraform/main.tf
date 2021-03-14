@@ -109,20 +109,59 @@ resource "aws_sns_topic" "ses-email-topic" {
 EOF
 }
 
+resource "aws_cloudwatch_log_group" "lambda_log_group" {
+  name              = "/aws/lambda/${var.function_name}"
+  retention_in_days = 14
+}
+
+resource "aws_iam_policy" "cloudwatch_lambda_logs" {
+  name        = "cloudwatch_lambda_logs"
+  path        = "/"
+  description = "IAM policy for logging from a lambda"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*",
+      "Effect": "Allow"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_logs_policy" {
+  role       = aws_iam_role.ses-email-role.name
+  policy_arn = aws_iam_policy.cloudwatch_lambda_logs.arn
+}
+
 resource "aws_lambda_function" "ses-email-forward-lambda" {
   filename      = "lambda.zip"
   function_name = var.function_name
-  role          = aws_iam_role.ses-email-role
+  role          = aws_iam_role.ses-email-role.arn
   handler       = "privatemail_handler"
 
   source_code_hash = filebase64sha256("lambda.zip")
   runtime          = "provided"
 
+  # cloudwatch logging
+  depends_on = [
+    aws_iam_role_policy_attachment.lambda_logs_policy,
+    aws_cloudwatch_log_group.lambda_log_group,
+  ]
+
   environment {
     variables = {
       RUST_BACKTRACE = 1,
-      FROM_EMAIL= var.from_email,
-      TO_EMAIL = var.to_email
+      FROM_EMAIL     = var.from_email,
+      TO_EMAIL       = var.to_email
     }
   }
 }
