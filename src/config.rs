@@ -1,6 +1,8 @@
 //! Copyright 2021 Nyah Check crate.
 //!
 //! Application-specific configuration for PrivatEmail
+
+#![allow(clippy::style)]
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -55,14 +57,46 @@ pub struct PrivatEmailConfig {
     pub email_key_prefix: String,
 }
 
-impl Default for PrivatEmailConfig {
-    fn default() -> Self {
+/// Create a new PrivatEmailConfig client struct from environment variables.
+impl PrivatEmailConfig {
+
+    /// Create default method for PrivatEmailConfig struct
+    pub fn default() -> Self {
         PrivatEmailConfig {
             from_email: String::from("nyah.dev"),
             to_email: String::from("nyah@hey.com"),
             subject_prefix: String::from("PrivateMail: "), // not currently used
             email_bucket: String::from("nyah-ses-emails"), // not currently used
             email_key_prefix: String::from("nyah/"), // not currently used
+        }
+    }
+
+    /// Create new PrivatEmailConfig struct from environment variables.
+    /// As long as you have the `from_email` and `to_email` environment setup; this should work
+    pub fn new_from_env() -> Self {
+        PrivatEmailConfig {
+            from_email: env::var("from_email").unwrap(),
+            to_email: env::var("to_email").unwrap(),
+            subject_prefix: env::var("subject_prefix").unwrap_or_default(),
+            email_bucket: env::var("email_bucket").unwrap_or_default(),
+            email_key_prefix: env::var("email_key_prefix").unwrap_or_default(),
+        }
+    }
+
+    /// Create a new PrivatEmailConfig struct.PrivatEmailConfig
+    /// You can leave the s3 bucket related fields empty since it's not currently being used
+    pub fn new<T, T, S>(from_email: F, to_email: T, subject_prefix: S) -> Self
+    where
+        T: ToString,
+        T: ToString,
+        S: ToString,
+    {
+        PrivatEmailConfig {
+            from_email: from_email,
+            to_email: to_email,
+            subject_prefix: subject_prefix,
+            email_bucket: String::from(""),
+            email_key_prefix: String::from(""),
         }
     }
 }
