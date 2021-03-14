@@ -211,8 +211,10 @@ resource "aws_ses_receipt_rule" "ses_rule" {
   enabled       = true
 
   s3_action {
-    bucket_name = aws_s3_bucket.ses-bucket.bucket
-    position    = 1
+    bucket_name       = aws_s3_bucket.ses-bucket.bucket
+    object_key_prefix = var.domain_name
+    topic_arn         = aws_sns_topic.ses-email-topic.arn
+    position          = 1
   }
 
   sns_action {
