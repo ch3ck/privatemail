@@ -20,9 +20,14 @@
 //! }
 //! ```
 #![allow(clippy::field_reassign_with_default)]
+
+#[cfg(feature = "PrivatEmailConfig")]
 mod config;
+#[cfg(feature = "PrivatEmailConfig")]
+pub use config::PrivatEmailConfig;
+
 use serde::de::DeserializeOwned;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use serde_json;
 use std::collections::HashMap;
 use std::fmt;
@@ -40,10 +45,10 @@ mod tests {
 // LambdaRequest: Represents the incoming Request from AWS Lambda
 //                This is deserialized into a struct payload
 //
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize)]
 #[serde(default)]
 pub struct LambdaRequest<Data: DeserializeOwned> {
-    #[serde(deserialize_with = "deserialize")]
+    #[serde(deserialize_with = "deserializer")]
     /** lambda request body */
     body: Data,
 }
@@ -55,7 +60,7 @@ impl<Data: DeserializeOwned> LambdaRequest<Data> {
 }
 
 /// LambdaResponse: The Outgoing response being passed by the Lambda
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LambdaResponse {
     /** is_base_64_encoded response field */
