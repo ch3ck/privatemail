@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Run code audit fix
-        run: cargo audit
+      - name: Run code audit
+        run: cargo audit fix
       - name: Check style
         run: cargo +nightly fmt
   build-and-test:
