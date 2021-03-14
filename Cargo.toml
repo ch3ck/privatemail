@@ -20,8 +20,8 @@ lto 			= true
 
 [dependencies]
 clippy = "0.0.302"
-lambda_runtime = "0.2.1"
-lambda_http = "0.1.1"
+lambda_runtime = "0.3.0"
+lambda_http = "0.3.0"
 rand = "0.8.3"
 serde = { version = "1.0.104", features = ["derive"] }
 serde_derive = "1.0.124"
