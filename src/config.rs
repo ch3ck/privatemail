@@ -11,6 +11,13 @@ use std::env;
  *
  * Implements [`serde::Deserialize`] and [`serde::Serialize`] and
  * can be composed with other consumer configs.
+ * PrivatEmailConfig:
+ *  from_email: Forwarded emails will be received from this SES verified email address.
+ *              To match all email addresses on a domain, use a key without the name part of the email(`example.com`)
+ *  to_email: Recipient email address. Example: jon@doe.example
+ *  subject_prefix: Forwarded emails subject will contain this prefix.
+ *  email_bucket: S3 bucket to store raw SES emails.
+ *  email_key_prefix: S3 key prefix where SES stores emails.
  * Example:
  *  Here is a custom `PrivatEmailConfig` for an application
  *
