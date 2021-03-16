@@ -21,38 +21,30 @@
 //! ```
 #![allow(clippy::field_reassign_with_default)]
 mod config;
-use config::PrivatEmailConfig;
+//use self::PrivatEmailConfig;
 
 use bytes::Bytes;
 use lambda_runtime::{Context, Error};
 use regex::Regex;
 use rusoto_core::Region;
 use rusoto_ses::{RawMessage, SendRawEmailRequest, Ses, SesClient};
-use serde::de::DeserializeOwned;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_logger::SimpleLogger;
 use std::collections::HashMap;
-use std::fmt;
 use std::fmt::Debug;
+use std::{fmt, process};
 use tracing::log::LevelFilter;
 use tracing::{error, info, warn};
 
 // LambdaRequest: Represents the incoming Request from AWS Lambda
 //                This is deserialized into a struct payload
 //
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
 #[serde(default)]
-pub struct LambdaRequest<Data: DeserializeOwned> {
-    #[serde(deserialize_with = "deserializer")]
+pub struct LambdaRequest {
     /** lambda request body */
-    body: Data,
-}
-
-impl<Data: DeserializeOwned> LambdaRequest<Data> {
-    pub fn body(&self) -> Data {
-        self.body
-    }
+    body: Value,
 }
 
 /// LambdaResponse: The Outgoing response being passed by the Lambda
@@ -103,21 +95,22 @@ impl fmt::Display for LambdaResponse {
 
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
-pub(crate) async fn PrivatEmail_Handler(
-    event: LambdaRequest<Value>,
+pub(crate) async fn privatemail_handler(
+    event: LambdaRequest,
     ctx: Context,
 ) -> Result<LambdaResponse, Error> {
     // Enable Cloudwatch error logging at runtime
     SimpleLogger::new().with_level(LevelFilter::Info).init().unwrap();
+    info!("Event: {:#?}, Context: {:#?}", event, ctx);
 
     // create ses client
     let ses_client = SesClient::new(Region::UsEast1);
 
     // Initialize the PrivatEmailConfig object
-    let email_config = PrivatEmailConfig::new_from_env();
+    let email_config = config::PrivatEmailConfig::new_from_env();
 
     // Fetch request payload
-    let sns_payload = event.body();
+    let sns_payload = event.body;
     info!("Email request: {:#?}", sns_payload.as_str());
 
     let raw_email_info: Value =
@@ -134,20 +127,22 @@ pub(crate) async fn PrivatEmail_Handler(
             == "FAIL"
     {
         warn!("Message contains spam or virus, skipping!");
+        process::exit(200);
         // Ok(LambdaResponse(200, "message skipped"))
     }
 
     // Rewrite Email From header to contain sender's name with forwarder's email address
     let mut from_header =
-        email_info["mail"]["commonHeaders"]["from"][0].as_str().unwrap();
+        email_info["mail"]["commonHeaders"]["from"][0].to_string();
     info!("FromHeader: {:#?}", from_header);
 
-    from_header = &str::replace(from_header, "/<(.*)>/", "");
-    let final_from_header = format!(" < {} > ", email_config.from_email);
+    from_header = from_header.as_str().replace("/<(.*)>/", "");
+    let final_from_header =
+        format!("{} < {} > ", from_header, email_config.from_email);
     info!("FinalFromHeader: {}", final_from_header);
 
     // extract email content
-    let mut email_message = email_info["content"].as_str().unwrap();
+    let mut email_message = email_info["content"].to_string();
     let mut new_message_header = format!(
         "From: {final_from}\r\nReply-To: {from}\r\nX-Original-To: {to}\r\nTo: {to}\r\n",
         final_from=final_from_header, from=email_info["info"]["commonHeaders"]["from"][0].as_str().unwrap(),
@@ -178,14 +173,14 @@ pub(crate) async fn PrivatEmail_Handler(
         );
     } else {
         let mut re = Regex::new(r"/Content-Type:.+\s *boundary.*/").unwrap();
-        match re.captures(email_message) {
+        match re.captures(&email_message) {
             Some(res) => email_message.to_string().push_str(
                 format!("{}\r\n", res.get(0).map_or("", |m| m.as_str()))
                     .as_str(),
             ),
             None => {
                 let renone = Regex::new(r"/^Content-Type:(.*)/m").unwrap();
-                match renone.captures(email_message) {
+                match renone.captures(&email_message) {
                     Some(x) => email_message.to_string().push_str(
                         format!("{}\r\n", x.get(0).map_or("", |m| m.as_str()))
                             .as_str(),
@@ -196,7 +191,7 @@ pub(crate) async fn PrivatEmail_Handler(
         }
 
         re = Regex::new(r"/^Content-Transfer-Encoding:(.*)/m").unwrap();
-        match re.captures(email_message) {
+        match re.captures(&email_message) {
             Some(res) => email_message.to_string().push_str(
                 format!("{}\r\n", res.get(0).map_or("", |m| m.as_str()))
                     .as_str(),
@@ -205,7 +200,7 @@ pub(crate) async fn PrivatEmail_Handler(
         }
 
         re = Regex::new(r"/^MIME-Version:(.*)/m").unwrap();
-        match re.captures(email_message) {
+        match re.captures(&email_message) {
             Some(res) => email_message.to_string().push_str(
                 format!("{}\r\n", res.get(0).map_or("", |m| m.as_str()))
                     .as_str(),
@@ -214,19 +209,18 @@ pub(crate) async fn PrivatEmail_Handler(
         }
 
         // cleanup email message and append headers
-        let mut str_list = email_message.to_string().split("\r\n\r\n");
+        let str_list = email_message.split("\r\n\r\n");
         let mut str_vector: Vec<&str> = str_list.collect();
         str_vector.remove(0);
         email_message = format!(
             "{}\r\n{}",
             new_message_header.as_str(),
             str_vector.join("\r\n\r\n")
-        )
-        .as_str();
+        );
     }
 
     // Forward raw email to recipient address
-    let mut raw_email = SendRawEmailRequest {
+    let raw_email = SendRawEmailRequest {
         raw_message: RawMessage { data: Bytes::from(email_message) },
         destinations: Some(vec![email_config.to_email]),
         source: Some(email_config.from_email),
@@ -257,12 +251,11 @@ mod tests {
     use std::io::BufReader;
     use std::path::PathBuf;
 
-    fn read_test_event() -> Result<LambdaRequest<Value>, Error> {
+    fn read_test_event() -> Result<LambdaRequest, Error> {
         // Open the file in read-only mode with buffer.
 
         let srcdir = PathBuf::from("./src");
-        let mut fp =
-            srcdir.parent().unwrap().join("/tests/payload/testEvent.json");
+        let fp = srcdir.parent().unwrap().join("/tests/payload/testEvent.json");
         let file = File::open(fp)?;
         let reader = BufReader::new(file);
 
@@ -274,10 +267,11 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore]
     async fn handler_handles() {
         let test_event = read_test_event().unwrap();
         assert_eq!(
-            PrivatEmail_Handler(test_event, Context::default())
+            privatemail_handler(test_event, Context::default())
                 .await
                 .expect("expected Ok(_) value")
                 .status_code,

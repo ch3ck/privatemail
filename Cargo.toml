@@ -13,11 +13,16 @@ edition     = "2018"
 documentation = "https://docs.rs/privatemail"
 
 
+[lib]
+name = "config"
+path = "src/lib/config.rs"
+
 [profile.release]
 overflow-checks = true
 panic 			= "abort"
 
 [dependencies]
+bytes = "1.0.1"
 clippy = "0.0.302"
 lambda_runtime = "0.3.0"
 tokio = { version = "1.3.0", features = ["macros", "io-util", "sync", "rt-multi-thread"] }
