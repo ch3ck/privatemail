@@ -110,20 +110,36 @@ pub(crate) async fn privatemail_handler(
     let email_config = config::PrivatEmailConfig::new_from_env();
 
     // Fetch request payload
-    let sns_payload = event.body;
+    let sns_payload: Value = serde_json::from_value(event.body.into()).unwrap();
     info!("Email request: {:#?}", sns_payload.as_str());
 
-    let raw_email_info: Value =
-        serde_json::from_value(sns_payload.into()).unwrap();
+    let raw_email_info = sns_payload.get("Records").unwrap();
     info!("Raw Email Info: {:?}", raw_email_info);
 
-    let email_info =
-        raw_email_info["Records"][0]["Sns"]["Message"].as_object().unwrap();
+    let email_info = raw_email_info
+        .get(0)
+        .unwrap()
+        .get("Sns")
+        .unwrap()
+        .get("Message")
+        .unwrap();
 
     // skip spam messages
-    if email_info["receipt"]["spamVerdict"]["status"].as_str().unwrap()
+    if email_info
+        .get("receipt")
+        .unwrap()
+        .get("spamVerdict")
+        .unwrap()
+        .get("status")
+        .unwrap()
         == "FAIL"
-        || email_info["receipt"]["virusVerdict"]["status"].as_str().unwrap()
+        || email_info
+            .get("receipt")
+            .unwrap()
+            .get("virusVerdict")
+            .unwrap()
+            .get("status")
+            .unwrap()
             == "FAIL"
     {
         warn!("Message contains spam or virus, skipping!");
@@ -132,28 +148,49 @@ pub(crate) async fn privatemail_handler(
     }
 
     // Rewrite Email From header to contain sender's name with forwarder's email address
-    let mut from_header =
-        email_info["mail"]["commonHeaders"]["from"][0].to_string();
+    let from_header = email_info
+        .get("mail")
+        .unwrap()
+        .get("commonHeaders")
+        .unwrap()
+        .get("from")
+        .unwrap()
+        .get(0)
+        .unwrap();
     info!("FromHeader: {:#?}", from_header);
 
-    from_header = from_header.as_str().replace("/<(.*)>/", "");
+    let new_from_header = from_header.as_str().unwrap().replace("/<(.*)>/", "");
     let final_from_header =
-        format!("{} < {} > ", from_header, email_config.from_email);
+        format!("{} < {} > ", new_from_header, email_config.from_email);
     info!("FinalFromHeader: {}", final_from_header);
 
     // extract email content
-    let mut email_message = email_info["content"].to_string();
+    let email_message = email_info.get("content").unwrap().as_str().unwrap();
     let mut new_message_header = format!(
         "From: {final_from}\r\nReply-To: {from}\r\nX-Original-To: {to}\r\nTo: {to}\r\n",
-        final_from=final_from_header, from=email_info["info"]["commonHeaders"]["from"][0].as_str().unwrap(),
-        to=email_info["info"]["commonHeaders"]["to"][0].as_str().unwrap(),
+        final_from=final_from_header, from=email_info.get("info").unwrap().get("commonHeaders").unwrap().get("from").unwrap().get(0).unwrap(),
+        to=email_info.get("info").unwrap().get("commonHeaders").unwrap().get("to").unwrap().get(0).unwrap(),
     );
 
     // Check if other emails are cc'ed
-    if email_info["mail"]["commonHeaders"]["cc"].is_string() {
+    if email_info
+        .get("mail")
+        .unwrap()
+        .get("commonHeaders")
+        .unwrap()
+        .get("cc")
+        .unwrap()
+        .is_string()
+    {
         let cc_list = format!(
             "CC: {}\r\n",
-            email_info["info"]["commonHeaders"]["cc"].as_str().unwrap()
+            email_info
+                .get("info")
+                .unwrap()
+                .get("commonHeaders")
+                .unwrap()
+                .get("cc")
+                .unwrap()
         );
         new_message_header.push_str(cc_list.as_str());
     }
@@ -161,10 +198,18 @@ pub(crate) async fn privatemail_handler(
     // Add subject to email
     let subject = format!(
         "Subject: {}\r\n",
-        email_info["info"]["commonHeaders"]["subject"].as_str().unwrap()
+        email_info
+            .get("info")
+            .unwrap()
+            .get("commonHeaders")
+            .unwrap()
+            .get("subject")
+            .unwrap()
     );
     new_message_header.push_str(subject.as_str());
     info!("Final Email Headers: {}", new_message_header);
+
+    let mut final_raw_email: String = String::new();
 
     // Add formatting fixes to email content
     if email_message.is_empty() {
@@ -212,7 +257,7 @@ pub(crate) async fn privatemail_handler(
         let str_list = email_message.split("\r\n\r\n");
         let mut str_vector: Vec<&str> = str_list.collect();
         str_vector.remove(0);
-        email_message = format!(
+        final_raw_email = format!(
             "{}\r\n{}",
             new_message_header.as_str(),
             str_vector.join("\r\n\r\n")
@@ -221,7 +266,7 @@ pub(crate) async fn privatemail_handler(
 
     // Forward raw email to recipient address
     let raw_email = SendRawEmailRequest {
-        raw_message: RawMessage { data: Bytes::from(email_message) },
+        raw_message: RawMessage { data: Bytes::from(final_raw_email) },
         destinations: Some(vec![email_config.to_email]),
         source: Some(email_config.from_email),
         configuration_set_name: None,
@@ -254,9 +299,10 @@ mod tests {
     fn read_test_event() -> Result<LambdaRequest, Error> {
         // Open the file in read-only mode with buffer.
 
-        let srcdir = PathBuf::from("./src");
-        let fp = srcdir.parent().unwrap().join("/tests/payload/testEvent.json");
-        let file = File::open(fp)?;
+        let mut srcdir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        srcdir.push("tests/payload/testEvent.json");
+        println!("Cur Dir: {}", srcdir.display());
+        let file = File::open(srcdir)?;
         let reader = BufReader::new(file);
 
         // Read the JSON contents of the file as an instance of `User`.
