@@ -6,13 +6,11 @@
 //! needed to forwared the emails.
 #![allow(clippy::style)]
 mod lib;
-use lib::PrivatEmail_Handler;
 use lambda_runtime::{handler_fn, Error};
-
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let privatemail_handler = handler_fn(PrivatEmail_Handler);
+    let privatemail_handler = handler_fn(lib::privatemail_handler);
     lambda_runtime::run(privatemail_handler).await?;
     Ok(())
 }

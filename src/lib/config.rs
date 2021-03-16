@@ -18,35 +18,6 @@ use std::env;
  *  subject_prefix: Forwarded emails subject will contain this prefix.
  *  email_bucket: S3 bucket to store raw SES emails.
  *  email_key_prefix: S3 key prefix where SES stores emails.
- * Example:
- *  Here is a custom `PrivatEmailConfig` for an application
- *
- * ```
- * use privatemail::PrivatEmailConfig;
- * use serde::Deserialize;
- *
- * #[derive(Deserialize)]
- * struct PrivatEmailConfig {
- *     privatemail_config: PrivatEmailConfig,
- *     /* other application related configs */
- * }
- *
- * fn main() -> Result<(), String> {
- *     let my_privatemail_config: PrivatEmailConfig = toml::from_str(
- *         r##"
- *              [email_server]
- *              from_email = "doe.example"
- *              to_email   = "recipient@mail.box"
- *              
- *
- *             ## ... (other app-specific config)
- *         "##
- *     ).map_err(|error| format!("parsing server config: {}", error))?;
- *
- *    let mail_config: &PrivatEmailConfig = &my_privatemail_config.from_email;
- *    /** privatemail_handler(mail_config) */
- *    Ok(())
- * ```
  */
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(default)]
@@ -97,6 +68,7 @@ impl PrivatEmailConfig {
 
     /// Create a new PrivatEmailConfig struct.PrivatEmailConfig
     /// You can leave the s3 bucket related fields empty since it's not currently being used
+    #[allow(dead_code)]
     pub fn new<F, T, S>(from_email: F, to_email: T, subject_prefix: S) -> Self
     where
         F: ToString,
@@ -110,5 +82,49 @@ impl PrivatEmailConfig {
             email_bucket: None,
             email_key_prefix: None,
         }
+    }
+}
+
+/** Test module for PrivatEmailConfig struct */
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::env;
+
+    #[test]
+    fn test_new_privatemail_config() {
+        let new_config = PrivatEmailConfig::new(
+            String::from("test_from"),
+            String::from("test_to"),
+            String::from("test_subject"),
+        );
+        assert_eq!(new_config.from_email.contains("test_from"), true);
+        assert_eq!(new_config.to_email.contains("test_to"), true);
+        assert_eq!(new_config.subject_prefix.unwrap(), "test_subject");
+        assert_eq!(new_config.email_bucket.is_none(), true);
+        assert_eq!(new_config.email_key_prefix.is_none(), true);
+    }
+
+    #[test]
+    fn test_default_privatemail_config() {
+        let new_config = PrivatEmailConfig::default();
+        assert_eq!(new_config.from_email.contains("nyah.dev"), true);
+        assert_eq!(new_config.to_email.contains("nyah@hey.com"), true);
+        assert_eq!(new_config.subject_prefix.is_none(), true);
+        assert_eq!(new_config.email_bucket.is_none(), true);
+        assert_eq!(new_config.email_key_prefix.is_none(), true);
+    }
+
+    #[test]
+    fn test_new_from_env_privatemail_config() {
+        env::set_var("from_email", "test_from");
+        env::set_var("to_email", "test_to");
+
+        let new_config = PrivatEmailConfig::new_from_env();
+        assert_eq!(new_config.from_email.contains("test_from"), true);
+        assert_eq!(new_config.to_email.contains("test_to"), true);
+        assert_eq!(new_config.subject_prefix.unwrap(), "PrivateMail: ");
+        assert_eq!(new_config.email_bucket.is_none(), true);
+        assert_eq!(new_config.email_key_prefix.is_none(), true);
     }
 }
