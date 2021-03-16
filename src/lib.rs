@@ -107,10 +107,11 @@ pub(crate) async fn PrivatEmail_Handler(
     event: LambdaRequest<Value>,
     ctx: Context,
 ) -> Result<LambdaResponse, Error> {
-    // create ses client
-    let ses_client = SesClient::new(Region::UsEast1);
     // Enable Cloudwatch error logging at runtime
     SimpleLogger::new().with_level(LevelFilter::Info).init().unwrap();
+
+    // create ses client
+    let ses_client = SesClient::new(Region::UsEast1);
 
     // Initialize the PrivatEmailConfig object
     let email_config = PrivatEmailConfig::new_from_env();
@@ -127,8 +128,10 @@ pub(crate) async fn PrivatEmail_Handler(
         raw_email_info["Records"][0]["Sns"]["Message"].as_object().unwrap();
 
     // skip spam messages
-    if email_info["receipt"]["spamVerdict"]["status"] == "FAIL"
-        || email_info["receipt"]["virusVerdict"]["status"] == "FAIL"
+    if email_info["receipt"]["spamVerdict"]["status"].as_str().unwrap()
+        == "FAIL"
+        || email_info["receipt"]["virusVerdict"]["status"].as_str().unwrap()
+            == "FAIL"
     {
         warn!("Message contains spam or virus, skipping!");
         // Ok(LambdaResponse(200, "message skipped"))
@@ -258,15 +261,16 @@ mod tests {
         // Open the file in read-only mode with buffer.
 
         let srcdir = PathBuf::from("./src");
-        let mut fp = srcdir.parent().unwrap().join("/tests/payload/testEvent.json");
+        let mut fp =
+            srcdir.parent().unwrap().join("/tests/payload/testEvent.json");
         let file = File::open(fp)?;
         let reader = BufReader::new(file);
-    
+
         // Read the JSON contents of the file as an instance of `User`.
         let req = serde_json::from_reader(reader)?;
-    
+
         // Return the `LambdaRequest`.
-        Ok(LambdaRequest{body: req})
+        Ok(LambdaRequest { body: req })
     }
 
     #[tokio::test]
@@ -277,7 +281,7 @@ mod tests {
                 .await
                 .expect("expected Ok(_) value")
                 .status_code,
-                200
+            200
         )
     }
 }

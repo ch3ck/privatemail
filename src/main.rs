@@ -12,7 +12,7 @@ use lambda_runtime::{handler_fn, Error};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let func = handler_fn(PrivatEmail_Handler);
-    lambda_runtime::run(PrivatEmail_Handler).await?;
+    let privatemail_handler = handler_fn(PrivatEmail_Handler);
+    lambda_runtime::run(privatemail_handler).await?;
     Ok(())
 }
