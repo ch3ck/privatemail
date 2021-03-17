@@ -18,8 +18,9 @@ jobs:
           rust-version: stable
       - name: Build for release
         run: |
+          cargo install cross
           rustup target add x86_64-unknown-linux-musl
-          cargo build --release --target x86_64-unknown-linux-musl
+          cross build --release --target x86_64-unknown-linux-musl
           zip -j lambda.zip ./target/x86_64-unknown-linux-musl/release/bootstrap
           cp lambda.zip terraform/
       - name: Setup Terraform
