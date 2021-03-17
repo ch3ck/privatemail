@@ -21,13 +21,12 @@
 //! ```
 #![allow(clippy::field_reassign_with_default)]
 mod config;
-//use self::PrivatEmailConfig;
 
-use bytes::Bytes;
 use lambda_runtime::{Context, Error};
-use regex::Regex;
 use rusoto_core::Region;
-use rusoto_ses::{RawMessage, SendRawEmailRequest, Ses, SesClient};
+use rusoto_ses::{
+    Body, Content, Destination, Message, SendEmailRequest, Ses, SesClient,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_logger::SimpleLogger;
@@ -93,6 +92,127 @@ impl fmt::Display for LambdaResponse {
     }
 }
 
+#[derive(Debug, Default, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MessageHeader {
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    name: String,
+
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    value: String,
+}
+
+#[derive(Debug, Default, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ReceiptStatus {
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    status: String,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LambdaInfo {
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    r#type: String,
+
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    topic_arn: String,
+
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    function_arn: String,
+
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    invocation_type: String,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ReceiptInfo {
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    timestamp: String,
+
+    processing_time_millis: u32,
+
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    recipients: Vec<String>,
+
+    spam_verdict: ReceiptStatus,
+    virus_verdict: ReceiptStatus,
+    spf_verdict: ReceiptStatus,
+    dkim_verdict: ReceiptStatus,
+    dmarc_verdict: ReceiptStatus,
+    action: LambdaInfo,
+}
+
+#[derive(Debug, Default, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CommonHeaderReq {
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    return_path: String,
+
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    from: Vec<String>,
+
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    date: String,
+
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    to: Vec<String>,
+
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    cc: Vec<String>,
+
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    bcc: Vec<String>,
+
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    message_id: String,
+
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    subject: String,
+}
+
+#[derive(Debug, Default, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MailInfoReq {
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    timestamp: String,
+
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    source: String,
+
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    message_id: String,
+
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    destination: Vec<String>,
+
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    headers_truncated: bool,
+
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    headers: Vec<MessageHeader>,
+    common_headers: CommonHeaderReq,
+}
+
+/// SesMessageRequest: SES Message
+#[derive(Debug, Default, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SesMessageRequest {
+    /** notification type */
+    notification_type: String,
+
+    /** receipt metadata **/
+    receipt: ReceiptInfo,
+
+    /** Email content */
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    content: String,
+
+    /** Email metadata */
+    mail: MailInfoReq,
+}
+
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
 pub(crate) async fn privatemail_handler(
@@ -111,10 +231,10 @@ pub(crate) async fn privatemail_handler(
 
     // Fetch request payload
     let sns_payload: Value = serde_json::from_value(event.body.into()).unwrap();
-    info!("Email request: {:#?}", sns_payload.as_str());
+    // info!("Email request: {:#?}", sns_payload.as_str());
 
     let raw_email_info = sns_payload.get("Records").unwrap();
-    info!("Raw Email Info: {:?}", raw_email_info);
+    // info!("Raw Email Info: {:?}", raw_email_info);
 
     let email_info = raw_email_info
         .get(0)
@@ -122,25 +242,17 @@ pub(crate) async fn privatemail_handler(
         .get("Sns")
         .unwrap()
         .get("Message")
-        .unwrap();
+        .unwrap()
+        .to_owned();
+
+    info!("Email Message: {:?}", email_info);
+    let new_email_info: SesMessageRequest =
+        serde_json::from_value(email_info).unwrap();
+    info!("Email NotificationType: {:#?}", new_email_info);
 
     // skip spam messages
-    if email_info
-        .get("receipt")
-        .unwrap()
-        .get("spamVerdict")
-        .unwrap()
-        .get("status")
-        .unwrap()
-        == "FAIL"
-        || email_info
-            .get("receipt")
-            .unwrap()
-            .get("virusVerdict")
-            .unwrap()
-            .get("status")
-            .unwrap()
-            == "FAIL"
+    if new_email_info.receipt.spam_verdict.status == "FAIL"
+        || new_email_info.receipt.virus_verdict.status == "FAIL"
     {
         warn!("Message contains spam or virus, skipping!");
         process::exit(200);
@@ -148,135 +260,38 @@ pub(crate) async fn privatemail_handler(
     }
 
     // Rewrite Email From header to contain sender's name with forwarder's email address
-    let from_header = email_info
-        .get("mail")
-        .unwrap()
-        .get("commonHeaders")
-        .unwrap()
-        .get("from")
-        .unwrap()
-        .get(0)
-        .unwrap();
-    info!("FromHeader: {:#?}", from_header);
-
-    let new_from_header = from_header.as_str().unwrap().replace("/<(.*)>/", "");
-    let final_from_header =
-        format!("{} < {} > ", new_from_header, email_config.from_email);
-    info!("FinalFromHeader: {}", final_from_header);
-
-    // extract email content
-    let email_message = email_info.get("content").unwrap().as_str().unwrap();
-    let mut new_message_header = format!(
-        "From: {final_from}\r\nReply-To: {from}\r\nX-Original-To: {to}\r\nTo: {to}\r\n",
-        final_from=final_from_header, from=email_info.get("info").unwrap().get("commonHeaders").unwrap().get("from").unwrap().get(0).unwrap(),
-        to=email_info.get("info").unwrap().get("commonHeaders").unwrap().get("to").unwrap().get(0).unwrap(),
-    );
-
-    // Check if other emails are cc'ed
-    if email_info
-        .get("mail")
-        .unwrap()
-        .get("commonHeaders")
-        .unwrap()
-        .get("cc")
-        .unwrap()
-        .is_string()
-    {
-        let cc_list = format!(
-            "CC: {}\r\n",
-            email_info
-                .get("info")
-                .unwrap()
-                .get("commonHeaders")
-                .unwrap()
-                .get("cc")
-                .unwrap()
-        );
-        new_message_header.push_str(cc_list.as_str());
-    }
-
-    // Add subject to email
-    let subject = format!(
-        "Subject: {}\r\n",
-        email_info
-            .get("info")
-            .unwrap()
-            .get("commonHeaders")
-            .unwrap()
-            .get("subject")
-            .unwrap()
-    );
-    new_message_header.push_str(subject.as_str());
-    info!("Final Email Headers: {}", new_message_header);
-
-    let mut final_raw_email: String = String::new();
-
-    // Add formatting fixes to email content
-    if email_message.is_empty() {
-        email_message.to_string().push_str(
-            format!("{}\r\n No message!", new_message_header).as_str(),
-        );
-    } else {
-        let mut re = Regex::new(r"/Content-Type:.+\s *boundary.*/").unwrap();
-        match re.captures(&email_message) {
-            Some(res) => email_message.to_string().push_str(
-                format!("{}\r\n", res.get(0).map_or("", |m| m.as_str()))
-                    .as_str(),
-            ),
-            None => {
-                let renone = Regex::new(r"/^Content-Type:(.*)/m").unwrap();
-                match renone.captures(&email_message) {
-                    Some(x) => email_message.to_string().push_str(
-                        format!("{}\r\n", x.get(0).map_or("", |m| m.as_str()))
-                            .as_str(),
-                    ),
-                    None => unreachable!(),
-                }
-            }
-        }
-
-        re = Regex::new(r"/^Content-Transfer-Encoding:(.*)/m").unwrap();
-        match re.captures(&email_message) {
-            Some(res) => email_message.to_string().push_str(
-                format!("{}\r\n", res.get(0).map_or("", |m| m.as_str()))
-                    .as_str(),
-            ),
-            None => unreachable!(),
-        }
-
-        re = Regex::new(r"/^MIME-Version:(.*)/m").unwrap();
-        match re.captures(&email_message) {
-            Some(res) => email_message.to_string().push_str(
-                format!("{}\r\n", res.get(0).map_or("", |m| m.as_str()))
-                    .as_str(),
-            ),
-            None => unreachable!(),
-        }
-
-        // cleanup email message and append headers
-        let str_list = email_message.split("\r\n\r\n");
-        let mut str_vector: Vec<&str> = str_list.collect();
-        str_vector.remove(0);
-        final_raw_email = format!(
-            "{}\r\n{}",
-            new_message_header.as_str(),
-            str_vector.join("\r\n\r\n")
-        );
-    }
-
-    // Forward raw email to recipient address
-    let raw_email = SendRawEmailRequest {
-        raw_message: RawMessage { data: Bytes::from(final_raw_email) },
-        destinations: Some(vec![email_config.to_email]),
-        source: Some(email_config.from_email),
+    let ses_email_message = SendEmailRequest {
         configuration_set_name: None,
-        from_arn: None,
+        destination: Destination {
+            bcc_addresses: Some(new_email_info.mail.common_headers.bcc),
+            cc_addresses: Some(new_email_info.mail.common_headers.cc),
+            to_addresses: Some(vec![email_config.to_email]),
+        },
+        message: Message {
+            body: Body {
+                html: Some(Content {
+                    charset: Some(String::from("utf-8")),
+                    data: new_email_info.content,
+                }),
+                text: Some(Content {
+                    charset: Some(String::from("utf-8")),
+                    data: new_email_info.content.clone(),
+                }),
+            },
+            subject: Content {
+                charset: Some(String::from("utf-8")),
+                data: new_email_info.mail.common_headers.subject,
+            },
+        },
+        reply_to_addresses: Some(new_email_info.mail.common_headers.from),
+        return_path: Some(new_email_info.mail.source),
         return_path_arn: None,
+        source: new_email_info.mail.source,
         source_arn: None,
         tags: None,
     };
 
-    match ses_client.send_raw_email(raw_email).await {
+    match ses_client.send_email(ses_email_message).await {
         Ok(email_response) => {
             info!("Email forward success: {:?}", email_response);
             Ok(LambdaResponse::new(200, email_response.message_id))
@@ -313,7 +328,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[ignore]
+    // #[ignore]
     async fn handler_handles() {
         let test_event = read_test_event().unwrap();
         assert_eq!(
