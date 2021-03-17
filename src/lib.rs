@@ -236,7 +236,7 @@ pub(crate) async fn privatemail_handler(
     let raw_email_info = sns_payload.get("Records").unwrap();
     // info!("Raw Email Info: {:?}", raw_email_info);
 
-    let email_info = raw_email_info
+    let email_info: Value = raw_email_info
         .get(0)
         .unwrap()
         .get("Sns")
@@ -271,11 +271,11 @@ pub(crate) async fn privatemail_handler(
             body: Body {
                 html: Some(Content {
                     charset: Some(String::from("utf-8")),
-                    data: new_email_info.content,
+                    data: new_email_info.content.to_string(),
                 }),
                 text: Some(Content {
                     charset: Some(String::from("utf-8")),
-                    data: new_email_info.content.clone(),
+                    data: new_email_info.content.to_string(),
                 }),
             },
             subject: Content {
@@ -284,7 +284,7 @@ pub(crate) async fn privatemail_handler(
             },
         },
         reply_to_addresses: Some(new_email_info.mail.common_headers.from),
-        return_path: Some(new_email_info.mail.source),
+        return_path: Some(new_email_info.mail.source.to_string()),
         return_path_arn: None,
         source: new_email_info.mail.source,
         source_arn: None,
@@ -334,7 +334,7 @@ mod tests {
         assert_eq!(
             privatemail_handler(test_event, Context::default())
                 .await
-                .expect("expected Ok(_) value")
+                .expect("expected Ok(_) response")
                 .status_code,
             200
         )
