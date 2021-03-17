@@ -8,7 +8,151 @@
             "MessageId": "ec587b7b-9b62-5fde-b8fd-23b17040830f",
             "TopicArn": "arn:aws:sns:us-east-1:465582702155:ses-email-forward-sns-topic-nyah",
             "Subject": "Amazon SES Email Receipt Notification",
-            "Message": "{\"notificationType\":\"Received\",\"mail\":{\"timestamp\":\"2021-03-16T17:20:33.791Z\",\"source\":\"checkneasoh@gmail.com\",\"messageId\":\"pr7ckssd9ko4tfmsdleh0gabvgeljqhchkrqb6o1\",\"destination\":[\"hello@nyah.dev\"],\"headersTruncated\":false,\"headers\":[{\"name\":\"Return-Path\",\"value\":\"<checkneasoh@gmail.com>\"},{\"name\":\"Received\",\"value\":\"from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42]) by inbound-smtp.us-east-1.amazonaws.com with SMTP id pr7ckssd9ko4tfmsdleh0gabvgeljqhchkrqb6o1 for hello@nyah.dev; Tue, 16 Mar 2021 17:20:33 +0000 (UTC)\"},{\"name\":\"X-SES-Spam-Verdict\",\"value\":\"PASS\"},{\"name\":\"X-SES-Virus-Verdict\",\"value\":\"PASS\"},{\"name\":\"Received-SPF\",\"value\":\"pass (spfCheck: domain of _spf.google.com designates 209.85.221.42 as permitted sender) client-ip=209.85.221.42; envelope-from=checkneasoh@gmail.com; helo=mail-wr1-f42.google.com;\"},{\"name\":\"Authentication-Results\",\"value\":\"amazonses.com; spf=pass (spfCheck: domain of _spf.google.com designates 209.85.221.42 as permitted sender) client-ip=209.85.221.42; envelope-from=checkneasoh@gmail.com; helo=mail-wr1-f42.google.com; dkim=pass header.i=@gmail.com; dmarc=pass header.from=gmail.com;\"},{\"name\":\"X-SES-RECEIPT\",\"value\":\"AEFBQUFBQUFBQUFHNWNZdHg0cFJ0ejRDTjE4NHJaYUpTMGpydCtDdlFJUStVNHhZVzlhVDZQSm1IVHl2ZHJjd3BlWlB1WTB6cTgrNkZLV3k3YVFJVVovTjcwdE5JS24zSER1V2c2M3dQOG1zSURSOGh6N0hxQVJUNkFXQnhFdDN1STJqQ3hZdUI3dFRqOFIvWkp1R1BXWVYwdnUwdVlxb3Eya0FablRxbW8zbEFPdWRkVUNhRTNhMXFhUEhHbWxEZlRSSnQ1MXNnYVFKcWN0TUFqMHRkc3BTZFlKZnRibFZ4K1M0ZEU1MzFVTzkyeFhSdDF1U0wvbWVjeDB6S2gzTnM1OFNVb2s4aFJkbmJNQTQ3NnhsV2wvUkY3ZjY1Vnk4QVZMTVBwUkFmSk9pYUJyNTNXUE5vYlE9PQ==\"},{\"name\":\"X-SES-DKIM-SIGNATURE\",\"value\":\"a=rsa-sha256; q=dns/txt; b=Kv9gxRaRl3J6n43zgG/fUA713uO1m+Qg8nHp+Sf4KUrHbEm/39hRMuj5qSCe5YxnHI9QzcXMqnuQ2VRlJ29FkJzPYzSzZxnWOxeF6quudwdojliEtNonKTdSPBtoN7SPwuAKCEfAA/9BqCnn4qGcnt/v5bYrXG/PTF8194jvCBI=; c=relaxed/simple; s=ug7nbtf4gccmlpwj322ax3p6ow6yfsug; d=amazonses.com; t=1615915234; v=1; bh=o5Js95TghIjgedzspqzUnqC1XrkSklzVawZvBgMG6Fc=; h=From:To:Cc:Bcc:Subject:Date:Message-ID:MIME-Version:Content-Type:X-SES-RECEIPT;\"},{\"name\":\"Received\",\"value\":\"by mail-wr1-f42.google.com with SMTP id e10so10875310wro.12 for <hello@nyah.dev>; Tue, 16 Mar 2021 10:20:33 -0700 (PDT)\"},{\"name\":\"DKIM-Signature\",\"value\":\"v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025; h=mime-version:references:in-reply-to:from:date:message-id:subject:to; bh=o5Js95TghIjgedzspqzUnqC1XrkSklzVawZvBgMG6Fc=; b=iVzO7byjOr0Es5tI4owCinAU/xe6pYFB5w8gYmKGlND2qrApVDXtCIQ67+X3YI3rg2Smu9lnuVfH5ewCs0DaE5azJ4mUkC+4pAjImde3udVV5PoAXF9wNVXWLzfim8bBi/aRHwrSwpv1sUL5h/ayfm8vzGQWrXwhbY6SNhi9H99jZbAhNtylvBYxaFqhGBT8mlB6tYkBsbK2v93xXv9MYBE3CfCd0bqH4X+zaD3gzaQ+zqe5XsGA0Exbq2IuV7gdLWJWsNcxGzSY4NJdd9arpar3Xk/zlASVpGp75DH5tNfOdgrNmw7wJAnZqQ/6etxxU5/6zHLcpZH0j7HjcvLHsg==\"},{\"name\":\"X-Google-DKIM-Signature\",\"value\":\"v=1; a=rsa-sha256; c=relaxed/relaxed; d=1e100.net; s=20161025; h=x-gm-message-state:mime-version:references:in-reply-to:from:date :message-id:subject:to; bh=o5Js95TghIjgedzspqzUnqC1XrkSklzVawZvBgMG6Fc=; b=Rl2ApGkrpI8RTTNTZCWkWnG64drIst8mpgqABxSzvm6fQgLShf+cPlcmyKQuB3nB9s aVLiSRRFJAksie3tVstNH4UqOpaKRQtOzmz7r+Ou+plf7uWWTAKh+R+1mRFHIutjAbaT lgS8sAinC4yHm1QezBa8IGmplxgJgxF6ILgXkh5tU7tg4SeId1UeLyK3my2jvBqS+H31 TBhmQ9JIbnnHMl3vSp8k8QzGFiyKDQ2FFIoz16X+FC1uz7R5VVk38YwGYoQipQ3WcJqv gVZ/OmKjyuKj5crhxiCWAhbUFDSLvAWwViJcVIjIMdzFnPratXzZYVhq49Ubs0t8BzzX mnEA==\"},{\"name\":\"X-Gm-Message-State\",\"value\":\"AOAM531jvrpoeVkSCQKri0FIJ606inRRIYDxQDipoMUkCM/f4klvhWhp bembEV6SYfXuHkfByhfBEpRe86UIO589gbbrkSRGYjvhtpE=\"},{\"name\":\"X-Google-Smtp-Source\",\"value\":\"ABdhPJyKDB5qOedKa9rxLMne+BT0OgmGLnvv/vnVXPHBRMmXnBfK9xasPnyiT9wwBsEsjlRRXlPY7yEQmEAQnDHTwds=\"},{\"name\":\"X-Received\",\"value\":\"by 2002:adf:f94c:: with SMTP id q12mr33877wrr.283.1615915232453; Tue, 16 Mar 2021 10:20:32 -0700 (PDT)\"},{\"name\":\"MIME-Version\",\"value\":\"1.0\"},{\"name\":\"References\",\"value\":\"<CANKjwFRK_dDXesPL2DPPwhPdW752heGwW4D=KFDS7=2Qe=BPjQ@mail.gmail.com> <CANKjwFTwgu-aNKLfakymcWyh5ANHb901HLzWaERiwupkeXkUOQ@mail.gmail.com> <CANKjwFQ41rYPZfPso1ThKTQQM0mGA=P7ExPhjc6RmkiN9f8AMQ@mail.gmail.com> <CANKjwFRTuheU_07okHK8sMzdoGkAjd4ejX6q2gPiibXGTrfi8A@mail.gmail.com> <CANKjwFTexcyvfPYpGZKfBc-wHr7M3brh4ni5cX3+bSqvjekmBA@mail.gmail.com> <CANKjwFR4ept_3KPp39gxafushoih2EVe4SLPddNbQY64Dqx33Q@mail.gmail.com> <CANKjwFSiSo1OUfLBNVNHohdcw78J1+mg0fcVaxaY8SP-hAJXPQ@mail.gmail.com> <CANKjwFRdVGOkKBq=m+DRFjN-y-X=ibVws2UZ_pBYo44z+=OgYQ@mail.gmail.com> <CANKjwFTMdb9ES+EbLJLnkF-Y_Bcr35OUiOzaWbo4aR42sX6q_Q@mail.gmail.com> <CANKjwFQsA9k5Ma6dsUi5nhPYb=O50S3-u+AMoM1cQUNwnvAM5g@mail.gmail.com> <CANKjwFTTGjJXFCCV9sKZ6LXHJMQUV+XeC1mpKC66dH6aRMf1aA@mail.gmail.com> <CANKjwFRjuhMNfLL9AOY1wX43Lnr3FMedGHN5=RYk6M4PVsqQaA@mail.gmail.com> <CANKjwFQiz1KOPCDyRWCUdSLcK+MbvOfgzWZ_-+v29ZdJ+k+jXQ@mail.gmail.com> <CANKjwFSiw5TKxhx0ZX9jE23UqYmTTDE6AbKFc5WN2kr5WqTT_A@mail.gmail.com> <CANKjwFTJgYipsEUwBuw6P4cKrbvd3JcJ3NwO1mz7bktaGJaRzA@mail.gmail.com> <CANKjwFSawtCA05qv8+-5GmjAK5hcH2JYkUJPKJUcEMO4FE-q6A@mail.gmail.com> <CANKjwFRTHKKc7AKKmPnpYykHeLLo6X_8DL49YxaZ4sJuZRynzw@mail.gmail.com>\"},{\"name\":\"In-Reply-To\",\"value\":\"<CANKjwFRTHKKc7AKKmPnpYykHeLLo6X_8DL49YxaZ4sJuZRynzw@mail.gmail.com>\"},{\"name\":\"From\",\"value\":\"Neasoh Check <checkneasoh@gmail.com>\"},{\"name\":\"Date\",\"value\":\"Tue, 16 Mar 2021 10:20:21 -0700\"},{\"name\":\"Message-ID\",\"value\":\"<CANKjwFQhT4eZARqfx97CnasJ8bjcZ9FSdRwqfdze3ghVJs1kPA@mail.gmail.com>\"},{\"name\":\"Subject\",\"value\":\"Re: Test\"},{\"name\":\"To\",\"value\":\"\\\"hello@nyah.dev\\\" <hello@nyah.dev>\"},{\"name\":\"Content-Type\",\"value\":\"multipart/alternative; boundary=\\\"0000000000006ae4d405bdaa9553\\\"\"}],\"commonHeaders\":{\"returnPath\":\"checkneasoh@gmail.com\",\"from\":[\"Neasoh Check <checkneasoh@gmail.com>\"],\"date\":\"Tue, 16 Mar 2021 10:20:21 -0700\",\"to\":[\"\\\"hello@nyah.dev\\\" <hello@nyah.dev>\"],\"messageId\":\"<CANKjwFQhT4eZARqfx97CnasJ8bjcZ9FSdRwqfdze3ghVJs1kPA@mail.gmail.com>\",\"subject\":\"Re: Test\"}},\"receipt\":{\"timestamp\":\"2021-03-16T17:20:33.791Z\",\"processingTimeMillis\":785,\"recipients\":[\"hello@nyah.dev\"],\"spamVerdict\":{\"status\":\"PASS\"},\"virusVerdict\":{\"status\":\"PASS\"},\"spfVerdict\":{\"status\":\"PASS\"},\"dkimVerdict\":{\"status\":\"PASS\"},\"dmarcVerdict\":{\"status\":\"PASS\"},\"action\":{\"type\":\"Lambda\",\"topicArn\":\"arn:aws:sns:us-east-1:465582702155:ses-email-forward-sns-topic-nyah\",\"functionArn\":\"arn:aws:lambda:us-east-1:465582702155:function:ses-forward-emails-lambda-nyah\",\"invocationType\":\"Event\"}}}",
+            "Message": {
+                "notificationType": "Received",
+                "mail": {
+                    "timestamp": "2021-03-17T00:04:24.787Z",
+                    "source": "donotreply@email.apple.com",
+                    "messageId": "3hrf8kqv0k8oc7t86fadne11md91d90gdpsell01",
+                    "destination": [
+                        "hello@nyah.dev"
+                    ],
+                    "headersTruncated": false,
+                    "headers": [{
+                            "name": "Return-Path",
+                            "value": "<donotreply@email.apple.com>"
+                        },
+                        {
+                            "name": "Received",
+                            "value": "from rn2-txn-msbadger06103.apple.com (rn2-txn-msbadger06103.apple.com [17.111.110.98]) by inbound-smtp.us-east-1.amazonaws.com with SMTP id 3hrf8kqv0k8oc7t86fadne11md91d90gdpsell01 for hello@nyah.dev; Wed, 17 Mar 2021 00:04:24 +0000 (UTC)"
+                        },
+                        {
+                            "name": "X-SES-Spam-Verdict",
+                            "value": "PASS"
+                        },
+                        {
+                            "name": "X-SES-Virus-Verdict",
+                            "value": "PASS"
+                        },
+                        {
+                            "name": "Received-SPF",
+                            "value": "pass (spfCheck: domain of email.apple.com designates 17.111.110.98 as permitted sender) client-ip=17.111.110.98; envelope-from=donotreply@email.apple.com; helo=rn2-txn-msbadger06103.apple.com;"
+                        },
+                        {
+                            "name": "Authentication-Results",
+                            "value": "amazonses.com; spf=pass (spfCheck: domain of email.apple.com designates 17.111.110.98 as permitted sender) client-ip=17.111.110.98; envelope-from=donotreply@email.apple.com; helo=rn2-txn-msbadger06103.apple.com; dkim=pass header.i=@email.apple.com; dmarc=pass header.from=email.apple.com;"
+                        },
+                        {
+                            "name": "X-SES-RECEIPT",
+                            "value": "AEFBQUFBQUFBQUFIc09Bb2pTTHBLZG1udTJTVk9OSmpyNG4xM0JNMmFPeVEwRlA1emk1TkdGa3FZOXhWNnBSb24zWmk5OGhOVWU1T2ViSmFoYjhGYUl0b09adi8yRTFUTXFTOThyUWZwNy8rSFZ1R2lDb0ZkM1A3N0I5a2FxU3RWZGlSaldZbXNiRjlEM0IrSEQ2VVhmQWVjQ3Z4UHBOMzIrVnpKbTEvcnpCMDRTMDYyKzBOQmw2OVpTZkYwY3Qrd2tGQkl6YW9USkxkV0pxNkhzTWJsWnVoejFtQmJXRm9mU1pZOUs5ZHd2a0dvZndUVTRvdzRmbURLM3FBUzF1L3Zna1NyUDNoandVV2tiZVp6Ymw4b09vK3UvcW16V3VsUmlPV01PV2FEeEJTNWxmNGhhazJ2L2c9PQ=="
+                        },
+                        {
+                            "name": "X-SES-DKIM-SIGNATURE",
+                            "value": "a=rsa-sha256; q=dns/txt; b=dIPAKDWZKrlyZ4fALXLZjvhOHDU79YnlTq9c+I0bba3euy4ZFlxRt+acEMWdDlxNVbmWjvmZ60drbALSWfhqdIOWmbvd6XaMyqS6DIV9dEqo3bpFgghi0+OZAqs4Y7oTHFezbYw7bMikCiFpOezL5J68C29tiYgm1w6sZvrXfso=; c=relaxed/simple; s=ug7nbtf4gccmlpwj322ax3p6ow6yfsug; d=amazonses.com; t=1615939465; v=1; bh=lVSsD3MUG3sqOrlw8QZ2JcSqd/lMVBvvpboqic7Fllg=; h=From:To:Cc:Bcc:Subject:Date:Message-ID:MIME-Version:Content-Type:X-SES-RECEIPT;"
+                        },
+                        {
+                            "name": "DKIM-Signature",
+                            "value": "v=1; a=rsa-sha256; c=relaxed/relaxed; d=email.apple.com; s=email0517; t=1615939463; bh=lVSsD3MUG3sqOrlw8QZ2JcSqd/lMVBvvpboqic7Fllg=; h=Date:From:To:Message-ID:Subject:Content-Type; b=LB+J4ywHV0ECEle/2saC11aFbomhd1IyMu9Ge8U/JXnoxei390LJY/Gm/QszMUoXZr45Du9xMjJ9qMpAAMmxE6xrs5SkMFrmJXEkXVmyMC8bmgIbqOwjMt3XxuJUb7SKd+IPv/EKoIGPyBwbtb3GxY5uhq8wmL38Ch2kv/PMFNFlUf1aSDqvR+cTzvH1kVQXJeL+vGDFlPLrP+2XzZvaUvY+oPpc1FrPNVwna9aWA8ZidOJw7UmNRucuVg67XNCXs5STc+Fc0uKHSvYnpC7JRhxufuhLqtkUrXij3rYcSBgor9GtYEkEQfqM7M+xkNB0k+2xI/uYi4cykUakVC9r0w=="
+                        },
+                        {
+                            "name": "Date",
+                            "value": "Wed, 17 Mar 2021 00:04:23 +0000 (GMT)"
+                        },
+                        {
+                            "name": "From",
+                            "value": "Apple Store <donotreply@email.apple.com>"
+                        },
+                        {
+                            "name": "To",
+                            "value": "hello@nyah.dev"
+                        },
+                        {
+                            "name": "Message-ID",
+                            "value": "<576581100.16661651.1615939463851@email.apple.com>"
+                        },
+                        {
+                            "name": "Subject",
+                            "value": "Explore your Apple Watch with a Specialist online."
+                        },
+                        {
+                            "name": "MIME-Version",
+                            "value": "1.0"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "multipart/alternative;  boundary="-- -- = _Part_16661649_1644988291 .1615939463851 ""
+                        },
+                        {
+                            "name": "X-EmailType-Id",
+                            "value": "1020280431"
+                        },
+                        {
+                            "name": "X-Sent-To",
+                            "value": "hello@nyah.dev,2,zNSWGI3%2F%2Bl6z0vgHH8sn4HUn5PAcUlT8D3A2HdLgtcNIUZNdkxlyJLn4BGgNXpxuJUh8Bj%2BxHaZuyTQ5BAarDP3i1s1etD%2BuVhios7BFrbykDjy4URZD%2B%2BpIQnOVmcq6KvN1zrTL9A2TbRgxt5JmiXv5rptVgp6%2FkgGw7WoYyr%2FemaHdc%2BFmacNH1jeqJrlEwqwdPbiS2NVKhARg9kKDvjnMQmWLoQmoom8cOYT9N9rxtq20%2BGk%2BgQi7f2Ojunm8UpCKwKQhjVLug05%2BsZKqeFsfl3SS%2BYAdsxncGwlMIzk0hkqpGyuO%2FM3fNZ21HwGJ0ei96l8%2FIvMKx%2FFPHWGaWObRvO8tQ5TelDG%2FeYOfRSNJXbgNKptLHwG9MD7uEm2fZ%2FWogWbAqMlMOXLVRenROZxdkSybvsgZ%2BCOvtxxydvVW3csoydJ4QqUupZ2%2BitJjGjdIckM3bdpQRuhAqaUfb%2FcwarD3Ps9mipJ2tVzAR4s%3D"
+                        },
+                        {
+                            "name": "X-COMMS-C",
+                            "value": "false"
+                        },
+                        {
+                            "name": "X-Business-Group",
+                            "value": "Customer Systems"
+                        },
+                        {
+                            "name": "X-Attach-Flag",
+                            "value": "N"
+                        },
+                        {
+                            "name": "X-TXN_ID",
+                            "value": "b598a4cb-6fbe-4148-a008-51db8930537e"
+                        },
+                        {
+                            "name": "X-DKIM_SIGN_REQUIRED",
+                            "value": "YES"
+                        }
+                    ],
+                    "commonHeaders": {
+                        "returnPath": "donotreply@email.apple.com",
+                        "from": [
+                            "Apple Store <donotreply@email.apple.com>"
+                        ],
+                        "date": "Wed, 17 Mar 2021 00:04:23 +0000 (GMT)",
+                        "to": [
+                            "hello@nyah.dev"
+                        ],
+                        "messageId": "<576581100.16661651.1615939463851@email.apple.com>",
+                        "subject": "Explore your Apple Watch with a Specialist online."
+                    }
+                },
+                "receipt": {
+                    "timestamp": "2021-03-17T00:04:24.787Z",
+                    "processingTimeMillis": 728,
+                    "recipients": [
+                        "hello@nyah.dev"
+                    ],
+                    "spamVerdict": {
+                        "status": "PASS"
+                    },
+                    "virusVerdict": {
+                        "status": "PASS"
+                    },
+                    "spfVerdict": {
+                        "status": "PASS"
+                    },
+                    "dkimVerdict": {
+                        "status": "PASS"
+                    },
+                    "dmarcVerdict": {
+                        "status": "PASS"
+                    },
+                    "action": {
+                        "type": "SNS",
+                        "topicArn": "arn:aws:sns:us-east-1:465582702155:ses-email-forward-sns-topic-nyah",
+                        "encoding": "UTF8"
+                    }
+                },
+                "content": "Return-Path: <donotreply@email.apple.com>rnReceived: from rn2-txn-msbadger06103.apple.com (rn2-txn-msbadger06103.apple.com [17.111.110.98])rn by inbound-smtp.us-east-1.amazonaws.com with SMTP id 3hrf8kqv0k8oc7t86fadne11md91d90gdpsell01rn for hello@nyah.dev;rn Wed, 17 Mar 2021 00:04:24 +0000 (UTC)rnX-SES-Spam-Verdict: PASSrnX-SES-Virus-Verdict: PASSrnReceived-SPF: pass (spfCheck: domain of email.apple.com designates 17.111.110.98 as permitted sender) client-ip=17.111.110.98; envelope-from=donotreply@email.apple.com; helo=rn2-txn-msbadger06103.apple.com;rnAuthentication-Results: amazonses.com;rn spf=pass (spfCheck: domain of email.apple.com designates 17.111.110.98 as permitted sender) client-ip=17.111.110.98; envelope-from=donotreply@email.apple.com; helo=rn2-txn-msbadger06103.apple.com;rn dkim=pass header.i=@email.apple.com;rn dmarc=pass header.from=email.apple.com;rnX-SES-RECEIPT: AEFBQUFBQUFBQUFIc09Bb2pTTHBLZG1udTJTVk9OSmpyNG4xM0JNMmFPeVEwRlA1emk1TkdGa3FZOXhWNnBSb24zWmk5OGhOVWU1T2ViSmFoYjhGYUl0b09adi8yRTFUTXFTOThyUWZwNy8rSFZ1R2lDb0ZkM1A3N0I5a2FxU3RWZGlSaldZbXNiRjlEM0IrSEQ2VVhmQWVjQ3Z4UHBOMzIrVnpKbTEvcnpCMDRTMDYyKzBOQmw2OVpTZkYwY3Qrd2tGQkl6YW9USkxkV0pxNkhzTWJsWnVoejFtQmJXRm9mU1pZOUs5ZHd2a0dvZndUVTRvdzRmbURLM3FBUzF1L3Zna1NyUDNoandVV2tiZVp6Ymw4b09vK3UvcW16V3VsUmlPV01PV2FEeEJTNWxmNGhhazJ2L2c9PQ==rnX-SES-DKIM-SIGNATURE: a=rsa-sha256; q=dns/txt; b=dIPAKDWZKrlyZ4fALXLZjvhOHDU79YnlTq9c+I0bba3euy4ZFlxRt+acEMWdDlxNVbmWjvmZ60drbALSWfhqdIOWmbvd6XaMyqS6DIV9dEqo3bpFgghi0+OZAqs4Y7oTHFezbYw7bMikCiFpOezL5J68C29tiYgm1w6sZvrXfso=; c=relaxed/simple; s=ug7nbtf4gccmlpwj322ax3p6ow6yfsug; d=amazonses.com; t=1615939465; v=1; bh=lVSsD3MUG3sqOrlw8QZ2JcSqd/lMVBvvpboqic7Fllg=; h=From:To:Cc:Bcc:Subject:Date:Message-ID:MIME-Version:Content-Type:X-SES-RECEIPT;rnDKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=email.apple.com;rnts=email0517; t=1615939463;rntbh=lVSsD3MUG3sqOrlw8QZ2JcSqd/lMVBvvpboqic7Fllg=;rnth=Date:From:To:Message-ID:Subject:Content-Type;rntb=LB+J4ywHV0ECEle/2saC11aFbomhd1IyMu9Ge8U/JXnoxei390LJY/Gm/QszMUoXZrnt r45Du9xMjJ9qMpAAMmxE6xrs5SkMFrmJXEkXVmyMC8bmgIbqOwjMt3XxuJUb7SKd+Irnt Pv/EKoIGPyBwbtb3GxY5uhq8wmL38Ch2kv/PMFNFlUf1aSDqvR+cTzvH1kVQXJeL+vrnt GDFlPLrP+2XzZvaUvY+oPpc1FrPNVwna9aWA8ZidOJw7UmNRucuVg67XNCXs5STc+Frnt c0uKHSvYnpC7JRhxufuhLqtkUrXij3rYcSBgor9GtYEkEQfqM7M+xkNB0k+2xI/uYirnt 4cykUakVC9r0w==rnDate: Wed, 17 Mar 2021 00:04:23 +0000 (GMT)rnFrom: Apple Store <donotreply@email.apple.com>rnTo: hello@nyah.devrnMessage-ID: <576581100.16661651.1615939463851@email.apple.com>rnSubject: Explore your Apple Watch with a Specialist online.rnMIME-Version: 1.0rnContent-Type: multipart/alternative; rntboundary="
+            }
             "Timestamp": "2021-03-16T17:20:34.581Z",
             "SignatureVersion": "1",
             "Signature": "oWiAwndwB/YtyU3a1JKE7UHSXLsbdXGQIuCHMGoXy3s8JWXTz/OU3v/yezenhLz92k2nYDr8Py2hDxqZiQ+U/w/9UL2mECEbzcn3VKV3XurpX/aw85RPxv2JTqroY5jDsZkh1amx+tD9jD1KzH61UsBadfovYL16Pl6Ipovr4GbumjeDWdYG87nsTCvSCwlwVnfXO8lrdqh+AgC2FaYrrYFmi8ZHD+PZTggd4+0je8FAJmUwe8xCiUuSaiRDvEAIN+X3k50b+uJDTq9W8fvwV0c0DJEwlOyWU9hhWxp2LqM9MhdRLhSxJG62k+RVi7U75CDrLhNt5Agg7JRLyxjaqA==",
