@@ -9,18 +9,21 @@ on:
 
 
 jobs:
-  terraform-infra-provision:
+  terraform-infra-provisioning:
     name: "Terraform"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
           rust-version: stable
-      - name: Build for release
+      - name: Fetch musl-rust image
+        run: docker pull clux/muslrust
+      - name: Build rust release binary
         run: |
-          cargo install cross
           rustup target add x86_64-unknown-linux-musl
-          cross build --release --target x86_64-unknown-linux-musl
+          docker run -v $PWD:/volume --rm -t clux/muslrust cargo build --release --target x86_64-unknown-linux-musl
+      - name: package lambda zip for terraform
+        run: |
           zip -j lambda.zip ./target/x86_64-unknown-linux-musl/release/bootstrap
           cp lambda.zip terraform/
       - name: Setup Terraform
