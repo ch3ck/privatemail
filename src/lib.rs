@@ -28,7 +28,7 @@ use rusoto_ses::{
     Body, Content, Destination, Message, SendEmailRequest, Ses, SesClient,
 };
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+// use serde_json::Value;
 use simple_logger::SimpleLogger;
 use std::collections::HashMap;
 use std::fmt::Debug;
@@ -39,16 +39,60 @@ use tracing::{error, info, warn};
 // LambdaRequest: Represents the incoming Request from AWS Lambda
 //                This is deserialized into a struct payload
 //
-#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize)]
 #[serde(default)]
 pub struct LambdaRequest {
     /** lambda request body */
-    body: Value,
+    records: Vec<LambdaRequestRecord>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+#[serde(default)]
+struct LambdaRequestRecord {
+    /** event source */
+    event_source: String,
+
+    /** event version */
+    event_version: String,
+
+    /** event subscription arn*/
+    event_subscription_arn: String,
+
+    /** SNS Message body */
+    sns: SNSMessageBody,
+}
+
+#[derive(Debug, Default, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+struct SNSMessageBody {
+    r#type: String,
+
+    message_id: String,
+
+    topic_arn: String,
+
+    subject: String,
+
+    /** SES Message request */
+    message: SesMessageRequest,
+
+    timestamp: String,
+
+    signature_version: u32,
+
+    signature: String,
+
+    signing_cert_url: String,
+
+    unsubscribe_url: String,
+
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
+    message_attributes: HashMap<String, String>,
 }
 
 /// LambdaResponse: The Outgoing response being passed by the Lambda
 #[derive(Debug, Default, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(default, rename_all = "camelCase")]
 pub struct LambdaResponse {
     /** is_base_64_encoded response field */
     is_base_64_encoded: bool,
@@ -60,7 +104,6 @@ pub struct LambdaResponse {
     headers: HashMap<String, String>,
 
     /** response body for LambdaResponse struct */
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     body: String,
 }
 
@@ -92,112 +135,91 @@ impl fmt::Display for LambdaResponse {
     }
 }
 
-#[derive(Debug, Default, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Default, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 struct MessageHeader {
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     name: String,
 
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     value: String,
 }
 
-#[derive(Debug, Default, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Default, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 struct ReceiptStatus {
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     status: String,
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Default, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 struct LambdaInfo {
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     r#type: String,
 
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     topic_arn: String,
 
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     function_arn: String,
 
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     invocation_type: String,
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Default, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 struct ReceiptInfo {
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     timestamp: String,
 
     processing_time_millis: u32,
 
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     recipients: Vec<String>,
 
     spam_verdict: ReceiptStatus,
+
     virus_verdict: ReceiptStatus,
+
     spf_verdict: ReceiptStatus,
     dkim_verdict: ReceiptStatus,
     dmarc_verdict: ReceiptStatus,
     action: LambdaInfo,
 }
 
-#[derive(Debug, Default, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Default, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 struct CommonHeaderReq {
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     return_path: String,
 
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     from: Vec<String>,
 
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     date: String,
 
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     to: Vec<String>,
 
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     cc: Vec<String>,
 
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     bcc: Vec<String>,
 
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     message_id: String,
 
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     subject: String,
 }
 
-#[derive(Debug, Default, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Default, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 struct MailInfoReq {
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     timestamp: String,
 
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     source: String,
 
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     message_id: String,
 
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     destination: Vec<String>,
 
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     headers_truncated: bool,
 
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     headers: Vec<MessageHeader>,
     common_headers: CommonHeaderReq,
 }
 
 /// SesMessageRequest: SES Message
-#[derive(Debug, Default, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Default, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 pub struct SesMessageRequest {
     /** notification type */
     notification_type: String,
@@ -206,7 +228,6 @@ pub struct SesMessageRequest {
     receipt: ReceiptInfo,
 
     /** Email content */
-    #[serde(default, skip_serializing_if = "String::is_empty")]
     content: String,
 
     /** Email metadata */
@@ -230,24 +251,12 @@ pub(crate) async fn privatemail_handler(
     let email_config = config::PrivatEmailConfig::new_from_env();
 
     // Fetch request payload
-    let sns_payload: Value = serde_json::from_value(event.body.into()).unwrap();
-    // info!("Email request: {:#?}", sns_payload.as_str());
+    let sns_payload: &LambdaRequestRecord = event.records.first().unwrap();
+    info!("Raw Email Info: {:?}", sns_payload);
 
-    let raw_email_info = sns_payload.get("Records").unwrap();
-    // info!("Raw Email Info: {:?}", raw_email_info);
-
-    let email_info: Value = raw_email_info
-        .get(0)
-        .unwrap()
-        .get("Sns")
-        .unwrap()
-        .get("Message")
-        .unwrap()
-        .to_owned();
-
+    let email_info = &sns_payload.sns.message;
     info!("Email Message: {:?}", email_info);
-    let new_email_info: SesMessageRequest =
-        serde_json::from_value(email_info).unwrap();
+    let new_email_info: &SesMessageRequest = email_info;
     info!("Email NotificationType: {:#?}", new_email_info);
 
     // skip spam messages
@@ -263,9 +272,9 @@ pub(crate) async fn privatemail_handler(
     let ses_email_message = SendEmailRequest {
         configuration_set_name: None,
         destination: Destination {
-            bcc_addresses: Some(new_email_info.mail.common_headers.bcc),
-            cc_addresses: Some(new_email_info.mail.common_headers.cc),
-            to_addresses: Some(vec![email_config.to_email]),
+            bcc_addresses: Some(new_email_info.mail.common_headers.bcc.clone()),
+            cc_addresses: Some(new_email_info.mail.common_headers.cc.clone()),
+            to_addresses: Some(vec![email_config.to_email.clone()]),
         },
         message: Message {
             body: Body {
@@ -280,13 +289,15 @@ pub(crate) async fn privatemail_handler(
             },
             subject: Content {
                 charset: Some(String::from("utf-8")),
-                data: new_email_info.mail.common_headers.subject,
+                data: new_email_info.mail.common_headers.subject.clone(),
             },
         },
-        reply_to_addresses: Some(new_email_info.mail.common_headers.from),
+        reply_to_addresses: Some(
+            new_email_info.mail.common_headers.from.clone(),
+        ),
         return_path: Some(new_email_info.mail.source.to_string()),
         return_path_arn: None,
-        source: new_email_info.mail.source,
+        source: new_email_info.mail.source.clone(),
         source_arn: None,
         tags: None,
     };
@@ -324,13 +335,13 @@ mod tests {
         let req = serde_json::from_reader(reader)?;
 
         // Return the `LambdaRequest`.
-        Ok(LambdaRequest { body: req })
+        Ok(req)
     }
 
     #[tokio::test]
     // #[ignore]
     async fn handler_handles() {
-        let test_event = read_test_event().unwrap();
+        let test_event = read_test_event();
         assert_eq!(
             privatemail_handler(test_event, Context::default())
                 .await
