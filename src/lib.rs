@@ -25,7 +25,8 @@ mod config;
 use lambda_runtime::{Context, Error};
 use rusoto_core::Region;
 use rusoto_ses::{
-    Body, Content, Destination, Message, SendEmailRequest, Ses, SesClient,
+    Body, Content, Destination, Message, MessageTag, SendEmailRequest, Ses,
+    SesClient,
 };
 use serde::Serialize;
 use serde_json::Value;
@@ -124,6 +125,12 @@ pub(crate) async fn privatemail_handler(
         .to_string();
     let from: Vec<String> = vec![raw_from];
 
+    let raw_from_tag = sns_payload["Message"]["mail"]["commonHeaders"]
+        ["returnPath"]
+        .as_str()
+        .unwrap()
+        .to_string();
+
     let to_emails: Option<Vec<String>> =
         Some(vec![email_config.to_email.to_string()]);
 
@@ -175,19 +182,14 @@ pub(crate) async fn privatemail_handler(
             },
         },
         reply_to_addresses: Some(from),
-        return_path: Some(
-            sns_payload["Message"]["mail"]["source"]
-                .as_str()
-                .unwrap()
-                .to_string(),
-        ),
-        return_path_arn: None,
-        source: sns_payload["Message"]["mail"]["source"]
-            .as_str()
-            .unwrap()
-            .to_string(),
-        source_arn: None,
-        tags: None,
+        return_path: Some(String::from("")),
+        return_path_arn: Some(String::from("")),
+        source: email_config.from_email.to_string(),
+        source_arn: Some(String::from("")),
+        tags: Some(vec![MessageTag {
+            name: String::from("Origin"),
+            value: raw_from_tag,
+        }]),
     };
 
     match ses_client.send_email(ses_email_message).await {
