@@ -27,68 +27,14 @@ use rusoto_core::Region;
 use rusoto_ses::{
     Body, Content, Destination, Message, SendEmailRequest, Ses, SesClient,
 };
-use serde::{Deserialize, Serialize};
-// use serde_json::Value;
+use serde::Serialize;
+use serde_json::Value;
 use simple_logger::SimpleLogger;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::{fmt, process};
 use tracing::log::LevelFilter;
 use tracing::{error, info, warn};
-
-// LambdaRequest: Represents the incoming Request from AWS Lambda
-//                This is deserialized into a struct payload
-//
-#[derive(Debug, Default, Deserialize)]
-#[serde(default)]
-pub struct LambdaRequest {
-    /** lambda request body */
-    records: Vec<LambdaRequestRecord>,
-}
-
-#[derive(Debug, Default, Deserialize)]
-#[serde(default)]
-struct LambdaRequestRecord {
-    /** event source */
-    event_source: String,
-
-    /** event version */
-    event_version: String,
-
-    /** event subscription arn*/
-    event_subscription_arn: String,
-
-    /** SNS Message body */
-    sns: SNSMessageBody,
-}
-
-#[derive(Debug, Default, Deserialize)]
-#[serde(default, rename_all = "camelCase")]
-struct SNSMessageBody {
-    r#type: String,
-
-    message_id: String,
-
-    topic_arn: String,
-
-    subject: String,
-
-    /** SES Message request */
-    message: SesMessageRequest,
-
-    timestamp: String,
-
-    signature_version: u32,
-
-    signature: String,
-
-    signing_cert_url: String,
-
-    unsubscribe_url: String,
-
-    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
-    message_attributes: HashMap<String, String>,
-}
 
 /// LambdaResponse: The Outgoing response being passed by the Lambda
 #[derive(Debug, Default, Clone, Serialize)]
@@ -135,109 +81,10 @@ impl fmt::Display for LambdaResponse {
     }
 }
 
-#[derive(Debug, Default, Deserialize)]
-#[serde(default, rename_all = "camelCase")]
-struct MessageHeader {
-    name: String,
-
-    value: String,
-}
-
-#[derive(Debug, Default, Deserialize)]
-#[serde(default, rename_all = "camelCase")]
-struct ReceiptStatus {
-    status: String,
-}
-
-#[derive(Debug, Default, Deserialize)]
-#[serde(default, rename_all = "camelCase")]
-struct LambdaInfo {
-    r#type: String,
-
-    topic_arn: String,
-
-    function_arn: String,
-
-    invocation_type: String,
-}
-
-#[derive(Debug, Default, Deserialize)]
-#[serde(default, rename_all = "camelCase")]
-struct ReceiptInfo {
-    timestamp: String,
-
-    processing_time_millis: u32,
-
-    recipients: Vec<String>,
-
-    spam_verdict: ReceiptStatus,
-
-    virus_verdict: ReceiptStatus,
-
-    spf_verdict: ReceiptStatus,
-    dkim_verdict: ReceiptStatus,
-    dmarc_verdict: ReceiptStatus,
-    action: LambdaInfo,
-}
-
-#[derive(Debug, Default, Deserialize)]
-#[serde(default, rename_all = "camelCase")]
-struct CommonHeaderReq {
-    return_path: String,
-
-    from: Vec<String>,
-
-    date: String,
-
-    to: Vec<String>,
-
-    cc: Vec<String>,
-
-    bcc: Vec<String>,
-
-    message_id: String,
-
-    subject: String,
-}
-
-#[derive(Debug, Default, Deserialize)]
-#[serde(default, rename_all = "camelCase")]
-struct MailInfoReq {
-    timestamp: String,
-
-    source: String,
-
-    message_id: String,
-
-    destination: Vec<String>,
-
-    headers_truncated: bool,
-
-    headers: Vec<MessageHeader>,
-    common_headers: CommonHeaderReq,
-}
-
-/// SesMessageRequest: SES Message
-#[derive(Debug, Default, Deserialize)]
-#[serde(default, rename_all = "camelCase")]
-pub struct SesMessageRequest {
-    /** notification type */
-    notification_type: String,
-
-    /** receipt metadata **/
-    receipt: ReceiptInfo,
-
-    /** Email content */
-    content: String,
-
-    /** Email metadata */
-    mail: MailInfoReq,
-}
-
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
 pub(crate) async fn privatemail_handler(
-    event: LambdaRequest,
+    event: Value,
     ctx: Context,
 ) -> Result<LambdaResponse, Error> {
     // Enable Cloudwatch error logging at runtime
@@ -251,17 +98,18 @@ pub(crate) async fn privatemail_handler(
     let email_config = config::PrivatEmailConfig::new_from_env();
 
     // Fetch request payload
-    let sns_payload: &LambdaRequestRecord = event.records.first().unwrap();
+    let sns_payload = event["Records"][0]["Sns"].as_object().unwrap();
     info!("Raw Email Info: {:?}", sns_payload);
 
-    let email_info = &sns_payload.sns.message;
-    info!("Email Message: {:?}", email_info);
-    let new_email_info: &SesMessageRequest = email_info;
-    info!("Email NotificationType: {:#?}", new_email_info);
-
     // skip spam messages
-    if new_email_info.receipt.spam_verdict.status == "FAIL"
-        || new_email_info.receipt.virus_verdict.status == "FAIL"
+    if sns_payload["Message"]["receipt"]["spamVerdict"]["status"]
+        .as_str()
+        .unwrap()
+        == "FAIL"
+        || sns_payload["Message"]["receipt"]["virusVerdict"]["status"]
+            .as_str()
+            .unwrap()
+            == "FAIL"
     {
         warn!("Message contains spam or virus, skipping!");
         process::exit(200);
@@ -269,35 +117,75 @@ pub(crate) async fn privatemail_handler(
     }
 
     // Rewrite Email From header to contain sender's name with forwarder's email address
+    let raw_from = sns_payload["Message"]["mail"]["commonHeaders"]
+        ["returnPath"]
+        .as_str()
+        .unwrap()
+        .to_string();
+    let from: Vec<String> = vec![raw_from];
+
+    let to_emails: Option<Vec<String>> =
+        Some(vec![email_config.to_email.to_string()]);
+
+    info!(
+        "Email Subject: {:#?}",
+        sns_payload["Message"]["mail"]["commonHeaders"]["subject"]
+            .as_str()
+            .unwrap()
+            .to_string()
+    );
+    info!("From Email: {:#?}", from);
+    info!("To Email: {:#?}", to_emails);
+    info!(
+        "Email content: {:#?}",
+        sns_payload["Message"]["content"].as_str().unwrap().to_string()
+    );
+
     let ses_email_message = SendEmailRequest {
         configuration_set_name: None,
         destination: Destination {
-            bcc_addresses: Some(new_email_info.mail.common_headers.bcc.clone()),
-            cc_addresses: Some(new_email_info.mail.common_headers.cc.clone()),
-            to_addresses: Some(vec![email_config.to_email.clone()]),
+            bcc_addresses: Some(vec!["".to_string()]),
+            cc_addresses: Some(vec!["".to_string()]),
+            to_addresses: to_emails,
         },
         message: Message {
             body: Body {
                 html: Some(Content {
                     charset: Some(String::from("utf-8")),
-                    data: new_email_info.content.to_string(),
+                    data: sns_payload["Message"]["content"]
+                        .as_str()
+                        .unwrap()
+                        .to_string(),
                 }),
                 text: Some(Content {
                     charset: Some(String::from("utf-8")),
-                    data: new_email_info.content.to_string(),
+                    data: sns_payload["Message"]["content"]
+                        .as_str()
+                        .unwrap()
+                        .to_string(),
                 }),
             },
             subject: Content {
                 charset: Some(String::from("utf-8")),
-                data: new_email_info.mail.common_headers.subject.clone(),
+                data: sns_payload["Message"]["mail"]["commonHeaders"]
+                    ["subject"]
+                    .as_str()
+                    .unwrap()
+                    .to_string(),
             },
         },
-        reply_to_addresses: Some(
-            new_email_info.mail.common_headers.from.clone(),
+        reply_to_addresses: Some(from),
+        return_path: Some(
+            sns_payload["Message"]["mail"]["source"]
+                .as_str()
+                .unwrap()
+                .to_string(),
         ),
-        return_path: Some(new_email_info.mail.source.to_string()),
         return_path_arn: None,
-        source: new_email_info.mail.source.clone(),
+        source: sns_payload["Message"]["mail"]["source"]
+            .as_str()
+            .unwrap()
+            .to_string(),
         source_arn: None,
         tags: None,
     };
@@ -318,29 +206,29 @@ pub(crate) async fn privatemail_handler(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs::File;
-    use std::io::BufReader;
     use std::path::PathBuf;
+    use std::{env, fs};
 
-    fn read_test_event() -> Result<LambdaRequest, Error> {
+    fn read_test_event() -> Value {
         // Open the file in read-only mode with buffer.
 
         let mut srcdir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         srcdir.push("tests/payload/testEvent.json");
         println!("Cur Dir: {}", srcdir.display());
-        let file = File::open(srcdir)?;
-        let reader = BufReader::new(file);
 
-        // Read the JSON contents of the file as an instance of `User`.
-        let req = serde_json::from_reader(reader)?;
+        // Read the JSON contents of the file as an instance of `String`.
+        let input_str = fs::read_to_string(srcdir.as_path()).unwrap();
+        info!("Input str: {}", input_str);
 
-        // Return the `LambdaRequest`.
-        Ok(req)
+        // Return the `Value`.
+        return serde_json::from_str(input_str.as_str()).unwrap();
     }
 
     #[tokio::test]
     // #[ignore]
     async fn handler_handles() {
+        env::set_var("TO_EMAIL", "hello@nyah.dev");
+        env::set_var("FROM_EMAIL", "njen@test.achu");
         let test_event = read_test_event();
         assert_eq!(
             privatemail_handler(test_event, Context::default())
