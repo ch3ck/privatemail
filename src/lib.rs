@@ -81,11 +81,6 @@ impl fmt::Display for LambdaResponse {
     }
 }
 
-// converts Value to String
-pub fn f(s: &Value) -> String {
-    s.to_string()
-}
-
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
 pub(crate) async fn privatemail_handler(
@@ -107,9 +102,11 @@ pub(crate) async fn privatemail_handler(
     info!("Raw Email Info: {:?}", sns_payload);
 
     // skip spam messages
-    if sns_payload["receipt"]["spamVerdit"]["status"].as_str().unwrap()
+    if sns_payload["Message"]["receipt"]["spamVerdict"]["status"]
+        .as_str()
+        .unwrap()
         == "FAIL"
-        || sns_payload["receipt"]["receipt"]["virusVerdit"]["status"]
+        || sns_payload["Message"]["receipt"]["virusVerdict"]["status"]
             .as_str()
             .unwrap()
             == "FAIL"
@@ -120,27 +117,36 @@ pub(crate) async fn privatemail_handler(
     }
 
     // Rewrite Email From header to contain sender's name with forwarder's email address
-    let raw_bcc = sns_payload["Message"]["mail"]["commonHeaders"]["bcc"]
-        .as_array()
-        .unwrap();
-    let bcc: Vec<String> = raw_bcc.iter().map(|s| f(s)).collect();
+    let raw_from = sns_payload["Message"]["mail"]["commonHeaders"]
+        ["returnPath"]
+        .as_str()
+        .unwrap()
+        .to_string();
+    let from: Vec<String> = vec![raw_from];
 
-    let raw_cc = sns_payload["Message"]["mail"]["commonHeaders"]["cc"]
-        .as_array()
-        .unwrap();
-    let cc: Vec<String> = raw_cc.iter().map(|s| f(s)).collect();
+    let to_emails: Option<Vec<String>> =
+        Some(vec![email_config.to_email.to_string()]);
 
-    let raw_from = sns_payload["Message"]["mail"]["commonHeaders"]["from"]
-        .as_array()
-        .unwrap();
-    let from: Vec<String> = raw_from.iter().map(|s| f(s)).collect();
+    info!(
+        "Email Subject: {:#?}",
+        sns_payload["Message"]["mail"]["commonHeaders"]["subject"]
+            .as_str()
+            .unwrap()
+            .to_string()
+    );
+    info!("From Email: {:#?}", from);
+    info!("To Email: {:#?}", to_emails);
+    info!(
+        "Email content: {:#?}",
+        sns_payload["Message"]["content"].as_str().unwrap().to_string()
+    );
 
     let ses_email_message = SendEmailRequest {
         configuration_set_name: None,
         destination: Destination {
-            bcc_addresses: Some(bcc),
-            cc_addresses: Some(cc),
-            to_addresses: Some(vec![email_config.to_email.clone()]),
+            bcc_addresses: Some(vec!["".to_string()]),
+            cc_addresses: Some(vec!["".to_string()]),
+            to_addresses: to_emails,
         },
         message: Message {
             body: Body {
@@ -200,8 +206,8 @@ pub(crate) async fn privatemail_handler(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::{env, fs};
     use std::path::PathBuf;
+    use std::{env, fs};
 
     fn read_test_event() -> Value {
         // Open the file in read-only mode with buffer.
