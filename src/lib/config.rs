@@ -58,8 +58,8 @@ impl PrivatEmailConfig {
     /// As long as you have the `from_email` and `to_email` environment setup; this should work
     pub fn new_from_env() -> Self {
         PrivatEmailConfig {
-            from_email: env::var("from_email").unwrap(),
-            to_email: env::var("to_email").unwrap(),
+            from_email: env::var("FROM_EMAIL").unwrap(),
+            to_email: env::var("TO_EMAIL").unwrap(),
             subject_prefix: Some(String::from("PrivateMail: ")), // not currently used
             email_bucket: None,
             email_key_prefix: None,
