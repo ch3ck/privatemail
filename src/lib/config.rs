@@ -58,8 +58,8 @@ impl PrivatEmailConfig {
     /// As long as you have the `from_email` and `to_email` environment setup; this should work
     pub fn new_from_env() -> Self {
         PrivatEmailConfig {
-            from_email: env::var("FROM_EMAIL").unwrap(),
-            to_email: env::var("TO_EMAIL").unwrap(),
+            from_email: env::var("FROM_EMAIL").unwrap_or_default(),
+            to_email: env::var("TO_EMAIL").unwrap_or_default(),
             subject_prefix: Some(String::from("PrivateMail: ")), // not currently used
             email_bucket: None,
             email_key_prefix: None,
@@ -117,8 +117,8 @@ mod tests {
 
     #[test]
     fn test_new_from_env_privatemail_config() {
-        env::set_var("from_email", "test_from");
-        env::set_var("to_email", "test_to");
+        env::set_var("FROM_EMAIL", "test_from");
+        env::set_var("TO_EMAIL", "test_to");
 
         let new_config = PrivatEmailConfig::new_from_env();
         assert_eq!(new_config.from_email.contains("test_from"), true);
