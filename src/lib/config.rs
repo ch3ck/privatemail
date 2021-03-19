@@ -43,7 +43,7 @@ pub struct PrivatEmailConfig {
 impl Default for PrivatEmailConfig {
     fn default() -> Self {
         PrivatEmailConfig {
-            from_email: String::from("nyah.dev"),
+            from_email: String::from("hello@nyah.dev"),
             to_email: String::from("nyah@hey.com"),
             subject_prefix: None, // not currently used
             email_bucket: None,
@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn test_default_privatemail_config() {
         let new_config = PrivatEmailConfig::default();
-        assert_eq!(new_config.from_email.contains("nyah.dev"), true);
+        assert_eq!(new_config.from_email.contains("hello@nyah.dev"), true);
         assert_eq!(new_config.to_email.contains("nyah@hey.com"), true);
         assert_eq!(new_config.subject_prefix.is_none(), true);
         assert_eq!(new_config.email_bucket.is_none(), true);

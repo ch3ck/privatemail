@@ -25,8 +25,7 @@ mod config;
 use lambda_runtime::{Context, Error};
 use rusoto_core::Region;
 use rusoto_ses::{
-    Body, Content, Destination, Message, MessageTag, SendEmailRequest, Ses,
-    SesClient,
+    Body, Content, Destination, Message, SendEmailRequest, Ses, SesClient,
 };
 use serde::Serialize;
 use serde_json::Value;
@@ -125,15 +124,6 @@ pub(crate) async fn privatemail_handler(
         .to_string();
     let from: Vec<String> = vec![raw_from];
 
-    let raw_from_tag = sns_payload["Message"]["mail"]["commonHeaders"]
-        ["returnPath"]
-        .as_str()
-        .unwrap()
-        .to_string();
-
-    let to_emails: Option<Vec<String>> =
-        Some(vec![email_config.to_email.to_string()]);
-
     info!(
         "Email Subject: {:#?}",
         sns_payload["Message"]["mail"]["commonHeaders"]["subject"]
@@ -142,7 +132,7 @@ pub(crate) async fn privatemail_handler(
             .to_string()
     );
     info!("From Email: {:#?}", from);
-    info!("To Email: {:#?}", to_emails);
+    info!("To Email: {:#?}", email_config.to_email.to_string());
     info!(
         "Email content: {:#?}",
         sns_payload["Message"]["content"].as_str().unwrap().to_string()
@@ -151,9 +141,9 @@ pub(crate) async fn privatemail_handler(
     let ses_email_message = SendEmailRequest {
         configuration_set_name: None,
         destination: Destination {
-            bcc_addresses: Some(vec!["".to_string()]),
-            cc_addresses: Some(vec!["".to_string()]),
-            to_addresses: to_emails,
+            bcc_addresses: None,
+            cc_addresses: None,
+            to_addresses: Some(vec![email_config.to_email.to_string()]),
         },
         message: Message {
             body: Body {
@@ -182,14 +172,11 @@ pub(crate) async fn privatemail_handler(
             },
         },
         reply_to_addresses: Some(from),
-        return_path: Some(String::from("")),
-        return_path_arn: Some(String::from("")),
+        return_path: None,
+        return_path_arn: None,
         source: email_config.from_email.to_string(),
-        source_arn: Some(String::from("")),
-        tags: Some(vec![MessageTag {
-            name: String::from("Origin"),
-            value: raw_from_tag,
-        }]),
+        source_arn: None,
+        tags: None,
     };
 
     match ses_client.send_email(ses_email_message).await {
@@ -229,8 +216,8 @@ mod tests {
     #[tokio::test]
     // #[ignore]
     async fn handler_handles() {
-        env::set_var("TO_EMAIL", "hello@nyah.dev");
-        env::set_var("FROM_EMAIL", "njen@test.achu");
+        env::set_var("TO_EMAIL", "nyah@hey.com");
+        env::set_var("FROM_EMAIL", "test@nyah.dev");
         let test_event = read_test_event();
         assert_eq!(
             privatemail_handler(test_event, Context::default())
