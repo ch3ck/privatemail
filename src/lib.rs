@@ -104,11 +104,11 @@ pub(crate) async fn privatemail_handler(
     // skip spam messages
     if sns_payload["Message"]["receipt"]["spamVerdict"]["status"]
         .as_str()
-        .unwrap()
+        .unwrap_or("PASS")
         == "FAIL"
         || sns_payload["Message"]["receipt"]["virusVerdict"]["status"]
             .as_str()
-            .unwrap()
+            .unwrap_or("PASS")
             == "FAIL"
     {
         warn!("Message contains spam or virus, skipping!");
@@ -122,7 +122,7 @@ pub(crate) async fn privatemail_handler(
         .as_str()
         .unwrap()
         .to_string();
-    let from: Vec<String> = vec![raw_from];
+    let original_sender: Vec<String> = vec![raw_from];
 
     info!(
         "Email Subject: {:#?}",
@@ -131,7 +131,7 @@ pub(crate) async fn privatemail_handler(
             .unwrap()
             .to_string()
     );
-    info!("From Email: {:#?}", from);
+    info!("From Email: {:#?}", original_sender);
     info!("To Email: {:#?}", email_config.to_email.to_string());
     info!(
         "Email content: {:#?}",
@@ -171,7 +171,7 @@ pub(crate) async fn privatemail_handler(
                     .to_string(),
             },
         },
-        reply_to_addresses: Some(from),
+        reply_to_addresses: Some(original_sender),
         return_path: None,
         return_path_arn: None,
         source: email_config.from_email.to_string(),
