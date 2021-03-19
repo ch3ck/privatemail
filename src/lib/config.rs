@@ -60,7 +60,7 @@ impl PrivatEmailConfig {
         PrivatEmailConfig {
             from_email: env::var("FROM_EMAIL").unwrap_or_default(),
             to_email: env::var("TO_EMAIL").unwrap_or_default(),
-            subject_prefix: Some(String::from("PrivateMail: ")), // not currently used
+            subject_prefix: None, // not currently used
             email_bucket: None,
             email_key_prefix: None,
         }
@@ -123,7 +123,7 @@ mod tests {
         let new_config = PrivatEmailConfig::new_from_env();
         assert_eq!(new_config.from_email.contains("test_from"), true);
         assert_eq!(new_config.to_email.contains("test_to"), true);
-        assert_eq!(new_config.subject_prefix.unwrap(), "PrivateMail: ");
+        assert_eq!(new_config.subject_prefix.is_none(), true);
         assert_eq!(new_config.email_bucket.is_none(), true);
         assert_eq!(new_config.email_key_prefix.is_none(), true);
     }
