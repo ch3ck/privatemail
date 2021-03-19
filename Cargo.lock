@@ -792,7 +792,6 @@ checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 name = "privatemail"
 version = "1.0.0"
 dependencies = [
- "bytes",
  "clippy",
  "lambda_runtime",
  "regex",
