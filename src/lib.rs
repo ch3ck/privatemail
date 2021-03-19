@@ -101,42 +101,42 @@ pub(crate) async fn privatemail_handler(
     let sns_payload = event["Records"][0]["Sns"].as_object().unwrap();
     info!("Raw Email Info: {:?}", sns_payload);
 
+    let sns_message: HashMap<String, Value> =
+        serde_json::from_str(sns_payload["Message"].as_str().unwrap())?;
+    info!("Parsed SES Message: {:#?}", sns_message);
+    info!("Parsed SES Message Mail: {:#?}", sns_message["mail"]);
+    info!("Parsed SES Message Receipt: {:#?}", sns_message["receipt"]);
+    info!("Parsed SES Message content: {:#?}", sns_message["content"]);
+
     // skip spam messages
-    if sns_payload["Message"]["receipt"]["spamVerdict"]["status"]
-        .as_str()
-        .unwrap_or("PASS")
-        == "FAIL"
-        || sns_payload["Message"]["receipt"]["virusVerdict"]["status"]
-            .as_str()
-            .unwrap_or("PASS")
-            == "FAIL"
-    {
+    let spam_verdict: String = serde_json::from_value(
+        sns_message["receipt"]["spamVerdict"]["status"].clone(),
+    )?;
+    let virus_verdict: String = serde_json::from_value(
+        sns_message["receipt"]["virus"]["status"].clone(),
+    )?;
+    if spam_verdict == "FAIL" || virus_verdict == "FAIL" {
         warn!("Message contains spam or virus, skipping!");
         process::exit(200);
         // Ok(LambdaResponse(200, "message skipped"))
     }
 
     // Rewrite Email From header to contain sender's name with forwarder's email address
-    let raw_from = sns_payload["Message"]["mail"]["commonHeaders"]
-        ["returnPath"]
-        .as_str()
-        .unwrap()
-        .to_string();
-    let original_sender: Vec<String> = vec![raw_from];
+    let original_sender: Vec<String> = serde_json::from_value(
+        sns_message["mail"]["commonHeaders"]["replyTo"].clone(),
+    )?;
+    let subject: String = serde_json::from_value(
+        sns_message["mail"]["commonHeaders"]["subject"].clone(),
+    )?;
+    let mail_content: String =
+        serde_json::from_value(sns_message["content"].clone())?;
+    let mail_content_txt: String =
+        serde_json::from_value(sns_message["content"].clone())?;
 
-    info!(
-        "Email Subject: {:#?}",
-        sns_payload["Message"]["mail"]["commonHeaders"]["subject"]
-            .as_str()
-            .unwrap()
-            .to_string()
-    );
-    info!("From Email: {:#?}", original_sender);
+    info!("sender: {:#?}", original_sender);
+    info!("Subject: {:#?}", subject);
     info!("To Email: {:#?}", email_config.to_email.to_string());
-    info!(
-        "Email content: {:#?}",
-        sns_payload["Message"]["content"].as_str().unwrap().to_string()
-    );
+    info!("Content: {:#?}", mail_content);
 
     let ses_email_message = SendEmailRequest {
         configuration_set_name: None,
@@ -149,26 +149,16 @@ pub(crate) async fn privatemail_handler(
             body: Body {
                 html: Some(Content {
                     charset: Some(String::from("utf-8")),
-                    data: sns_payload["Message"]["content"]
-                        .as_str()
-                        .unwrap()
-                        .to_string(),
+                    data: mail_content,
                 }),
                 text: Some(Content {
                     charset: Some(String::from("utf-8")),
-                    data: sns_payload["Message"]["content"]
-                        .as_str()
-                        .unwrap()
-                        .to_string(),
+                    data: mail_content_txt,
                 }),
             },
             subject: Content {
                 charset: Some(String::from("utf-8")),
-                data: sns_payload["Message"]["mail"]["commonHeaders"]
-                    ["subject"]
-                    .as_str()
-                    .unwrap()
-                    .to_string(),
+                data: subject,
             },
         },
         reply_to_addresses: Some(original_sender),
