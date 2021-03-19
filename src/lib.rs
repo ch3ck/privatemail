@@ -89,7 +89,7 @@ pub(crate) async fn privatemail_handler(
 ) -> Result<LambdaResponse, Error> {
     // Enable Cloudwatch error logging at runtime
     SimpleLogger::new().with_level(LevelFilter::Info).init().unwrap();
-    info!("Event: {:#?}, Context: {:#?}", event, ctx);
+    info!("Event: {:#?}, Context: {:#?}", event.as_object().unwrap(), ctx);
 
     // create ses client
     let ses_client = SesClient::new(Region::UsEast1);
