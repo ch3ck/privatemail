@@ -81,6 +81,7 @@ impl fmt::Display for LambdaResponse {
     }
 }
 
+
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
 pub(crate) async fn privatemail_handler(
@@ -104,8 +105,8 @@ pub(crate) async fn privatemail_handler(
     let sns_message: HashMap<String, Value> =
         serde_json::from_str(sns_payload["Message"].as_str().unwrap())?;
     info!("Parsed SES Message: {:#?}", sns_message);
-    info!("Parsed SES Message Mail: {:#?}", sns_message["mail"]);
-    info!("Parsed SES Message Receipt: {:#?}", sns_message["receipt"]);
+    // info!("Parsed SES Message Mail: {:#?}", sns_message["mail"]);
+    // info!("Parsed SES Message Receipt: {:#?}", sns_message["receipt"]);
     info!("Parsed SES Message content: {:#?}", sns_message["content"]);
 
     // skip spam messages
@@ -128,10 +129,10 @@ pub(crate) async fn privatemail_handler(
     let subject: String = serde_json::from_value(
         sns_message["mail"]["commonHeaders"]["subject"].clone(),
     )?;
-    let mail_content: String =
-        serde_json::from_value(sns_message["content"].clone())?;
-    let mail_content_txt: String =
-        serde_json::from_value(sns_message["content"].clone())?;
+
+    // <<<< The bug is extracting the email from the JSON <<<< //
+    assert_eq!(sns_message["content"].as_str().unwrap(), "test");
+    let mail_content: String = sns_message["content"].to_string().clone();
 
     info!("sender: {:#?}", original_sender);
     info!("Subject: {:#?}", subject);
@@ -149,12 +150,9 @@ pub(crate) async fn privatemail_handler(
             body: Body {
                 html: Some(Content {
                     charset: Some(String::from("utf-8")),
-                    data: mail_content,
+                    data: String::from(mail_content),
                 }),
-                text: Some(Content {
-                    charset: Some(String::from("utf-8")),
-                    data: mail_content_txt,
-                }),
+                text: None,
             },
             subject: Content {
                 charset: Some(String::from("utf-8")),
@@ -180,6 +178,7 @@ pub(crate) async fn privatemail_handler(
         }
     }
 }
+
 
 /** Test module for privatemail package */
 #[cfg(test)]
