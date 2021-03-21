@@ -27,7 +27,7 @@ use rusoto_core::Region;
 use rusoto_ses::{
     Body, Content, Destination, Message, SendEmailRequest, Ses, SesClient,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_logger::SimpleLogger;
 use std::collections::HashMap;
@@ -81,6 +81,54 @@ impl fmt::Display for LambdaResponse {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct EmailReceiptNotification {
+    #[serde(rename = "notificationType")]
+    notification_type: String,
+    mail: Mail,
+    receipt: Receipt,
+    content: String,
+    // #[serde(flatten)]
+    // other: HashMap<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct Mail {
+    timestamp: String,
+    source: String,
+    #[serde(rename = "messageId")]
+    message_id: String,
+    destination: Vec<String>,
+    commonHeaders: CommonHeaders,
+    #[serde(flatten)]
+    other: HashMap<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct CommonHeaders {
+    // replyTo: Vec<String>,
+    subject: String,
+    #[serde(rename = "returnPath")]
+    return_path: String,
+    #[serde(flatten)]
+    other: HashMap<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct Receipt {
+    #[serde(rename = "spamVerdict")]
+    spam_verdict: Verdict,
+    #[serde(rename = "virusVerdict")]
+    virus_verdict: Verdict,
+    #[serde(flatten)]
+    other: HashMap<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct Verdict {
+    status: String,
+}
+
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
 pub(crate) async fn privatemail_handler(
@@ -101,36 +149,28 @@ pub(crate) async fn privatemail_handler(
     let sns_payload = event["Records"][0]["Sns"].as_object().unwrap();
     info!("Raw Email Info: {:?}", sns_payload);
 
-    let sns_message: HashMap<String, Value> =
-        serde_json::from_str(sns_payload["Message"].as_str().unwrap()).unwrap();
+    let sns_message: EmailReceiptNotification =
+        serde_json::from_str(sns_payload["Message"].as_str().unwrap())?;
     info!("Parsed SES Message: {:#?}", sns_message);
-    info!("Parsed SES Message content: {:#?}", sns_message["content"]);
-    info!("Is String: {}", sns_message["content"].is_string());
+    info!("Parsed SES Message Mail: {:#?}", sns_message.mail);
+    info!("Parsed SES Message Receipt: {:#?}", sns_message.receipt);
+    info!("Parsed SES Message content: {:#?}", sns_message.content);
 
     // skip spam messages
-    let spam_verdict: &str = sns_message.get("receipt").unwrap()["spamVerdict"]
-        ["status"]
-        .as_str()
-        .unwrap_or_default();
-    let virus_verdict: &str = sns_message.get("receipt").unwrap()["virus"]
-        ["status"]
-        .as_str()
-        .unwrap_or_default();
-    if spam_verdict == "FAIL" || virus_verdict == "FAIL" {
+    if sns_message.receipt.spam_verdict.status == "FAIL"
+        || sns_message.receipt.virus_verdict.status == "FAIL"
+    {
         warn!("Message contains spam or virus, skipping!");
         process::exit(200);
+        // Ok(LambdaResponse(200, "message skipped"))
     }
-
     // Rewrite Email From header to contain sender's name with forwarder's email address
-    let original_sender: Vec<String> = serde_json::from_value(
-        sns_message["mail"]["commonHeaders"]["replyTo"].clone(),
-    )?;
-    let subject: String = serde_json::from_value(
-        sns_message["mail"]["commonHeaders"]["subject"].clone(),
-    )?;
+    let original_sender: String = sns_message.mail.commonHeaders.return_path;
 
+    let subject: String = sns_message.mail.commonHeaders.subject;
     // <<<< The bug is extracting the email from the JSON <<<< //
-    let mail_content: String = sns_message["content"].to_string().clone();
+
+    let mail_content: String = sns_message.content;
 
     info!("sender: {:#?}", original_sender);
     info!("Subject: {:#?}", subject);
@@ -157,7 +197,7 @@ pub(crate) async fn privatemail_handler(
                 data: subject,
             },
         },
-        reply_to_addresses: Some(original_sender),
+        reply_to_addresses: Some(vec![original_sender]),
         return_path: None,
         return_path_arn: None,
         source: email_config.from_email.to_string(),
@@ -202,9 +242,10 @@ mod tests {
     #[tokio::test]
     // #[ignore = "skipping integration because because of IAM requirements"]
     async fn handler_handles() {
-        env::set_var("TO_EMAIL", "onions@suya.io");
-        env::set_var("FROM_EMAIL", "achu@fufu.soup");
+        env::set_var("TO_EMAIL", "test@nyah.dev");
+        env::set_var("FROM_EMAIL", "achu@fufu.africa");
         let test_event = read_test_event();
+
         assert_eq!(
             privatemail_handler(test_event, Context::default())
                 .await
