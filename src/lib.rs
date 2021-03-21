@@ -81,7 +81,6 @@ impl fmt::Display for LambdaResponse {
     }
 }
 
-
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
 pub(crate) async fn privatemail_handler(
@@ -103,11 +102,12 @@ pub(crate) async fn privatemail_handler(
     info!("Raw Email Info: {:?}", sns_payload);
 
     let sns_message: HashMap<String, Value> =
-        serde_json::from_str(sns_payload["Message"].as_str().unwrap())?;
+        serde_json::from_str(sns_payload["Message"].as_str().unwrap()).unwrap();
     info!("Parsed SES Message: {:#?}", sns_message);
     // info!("Parsed SES Message Mail: {:#?}", sns_message["mail"]);
     // info!("Parsed SES Message Receipt: {:#?}", sns_message["receipt"]);
     info!("Parsed SES Message content: {:#?}", sns_message["content"]);
+    info!("Is String: {}", sns_message["content"].is_string());
 
     // skip spam messages
     let spam_verdict: String = serde_json::from_value(
@@ -150,7 +150,7 @@ pub(crate) async fn privatemail_handler(
             body: Body {
                 html: Some(Content {
                     charset: Some(String::from("utf-8")),
-                    data: String::from(mail_content),
+                    data: mail_content,
                 }),
                 text: None,
             },
@@ -179,7 +179,6 @@ pub(crate) async fn privatemail_handler(
     }
 }
 
-
 /** Test module for privatemail package */
 #[cfg(test)]
 mod tests {
@@ -203,7 +202,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[ignore = "skipping integration because because of IAM requirements"]
+    // #[ignore = "skipping integration because because of IAM requirements"]
     async fn handler_handles() {
         env::set_var("TO_EMAIL", "test@nyah.dev");
         env::set_var("FROM_EMAIL", "achu@fufu.africa");
