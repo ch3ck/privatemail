@@ -18,15 +18,19 @@ variable "topic" {
 
 variable "from_email" {
   default = "hello@nyah.dev"
+  description = "Original email from which the email was sent to."
 }
 
 variable "to_email" {
   default = "nyah@hey.com"
+  description =  "AWS Verified email for forwarding your emails"
 }
 
 variable "region" {
   default = "us-east-1"
+  desription = "AWS region for deployment"
 }
+
 
 variable "organization" {
   default     = "nyahdev"
@@ -40,12 +44,15 @@ variable "workspace" {
 
 variable "rule_set_name" {
   default = "ses-forward-rule-set-nyah"
+  decription = "ses forward rule set name"
 }
 
 variable "rule_name" {
   default = "ses-forward-rule-nyah"
+  description = "ses forward rule name"
 }
 
 variable "domain_name" {
   default = "nyah.dev"
+  description = "verified AWS domain"
 }
