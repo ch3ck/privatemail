@@ -99,7 +99,10 @@ pub struct Mail {
     #[serde(rename = "messageId")]
     message_id: String,
     destination: Vec<String>,
+
+    #[serde(rename = "commonHeaders")]
     common_headers: CommonHeaders,
+
     #[serde(flatten)]
     other: HashMap<String, Value>,
 }
