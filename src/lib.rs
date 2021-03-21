@@ -104,22 +104,21 @@ pub(crate) async fn privatemail_handler(
     let sns_message: HashMap<String, Value> =
         serde_json::from_str(sns_payload["Message"].as_str().unwrap()).unwrap();
     info!("Parsed SES Message: {:#?}", sns_message);
-    // info!("Parsed SES Message Mail: {:#?}", sns_message["mail"]);
-    // info!("Parsed SES Message Receipt: {:#?}", sns_message["receipt"]);
     info!("Parsed SES Message content: {:#?}", sns_message["content"]);
     info!("Is String: {}", sns_message["content"].is_string());
 
     // skip spam messages
-    let spam_verdict: String = serde_json::from_value(
-        sns_message["receipt"]["spamVerdict"]["status"].clone(),
-    )?;
-    let virus_verdict: String = serde_json::from_value(
-        sns_message["receipt"]["virus"]["status"].clone(),
-    )?;
+    let spam_verdict: &str = sns_message.get("receipt").unwrap()["spamVerdict"]
+        ["status"]
+        .as_str()
+        .unwrap_or_default();
+    let virus_verdict: &str = sns_message.get("receipt").unwrap()["virus"]
+        ["status"]
+        .as_str()
+        .unwrap_or_default();
     if spam_verdict == "FAIL" || virus_verdict == "FAIL" {
         warn!("Message contains spam or virus, skipping!");
         process::exit(200);
-        // Ok(LambdaResponse(200, "message skipped"))
     }
 
     // Rewrite Email From header to contain sender's name with forwarder's email address
@@ -131,7 +130,6 @@ pub(crate) async fn privatemail_handler(
     )?;
 
     // <<<< The bug is extracting the email from the JSON <<<< //
-    assert_eq!(sns_message["content"].as_str().unwrap(), "test");
     let mail_content: String = sns_message["content"].to_string().clone();
 
     info!("sender: {:#?}", original_sender);
