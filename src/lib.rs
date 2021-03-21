@@ -240,7 +240,7 @@ mod tests {
     }
 
     #[tokio::test]
-    // #[ignore = "skipping integration because because of IAM requirements"]
+    #[ignore = "skipping integration because because of IAM requirements"]
     async fn handler_handles() {
         env::set_var("TO_EMAIL", "test@nyah.dev");
         env::set_var("FROM_EMAIL", "achu@fufu.africa");
