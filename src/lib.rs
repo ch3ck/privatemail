@@ -99,7 +99,7 @@ pub struct Mail {
     #[serde(rename = "messageId")]
     message_id: String,
     destination: Vec<String>,
-    commonHeaders: CommonHeaders,
+    common_headers: CommonHeaders,
     #[serde(flatten)]
     other: HashMap<String, Value>,
 }
@@ -165,9 +165,9 @@ pub(crate) async fn privatemail_handler(
         // Ok(LambdaResponse(200, "message skipped"))
     }
     // Rewrite Email From header to contain sender's name with forwarder's email address
-    let original_sender: String = sns_message.mail.commonHeaders.return_path;
+    let original_sender: String = sns_message.mail.common_headers.return_path;
 
-    let subject: String = sns_message.mail.commonHeaders.subject;
+    let subject: String = sns_message.mail.common_headers.subject;
     // <<<< The bug is extracting the email from the JSON <<<< //
 
     let mail_content: String = sns_message.content;
