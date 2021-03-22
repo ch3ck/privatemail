@@ -6,12 +6,12 @@
 [![forthebadge](https://forthebadge.com/images/badges/powered-by-black-magic.svg)](https://github.com/ch3ck/privatemail)
 [![forthebadge](https://forthebadge.com/images/badges/made-with-rust.svg)](https://github.com/ch3ck/privatemail)
 
-Forward emails from verified domains on SES to `verified email`.
+Forward emails from verified domains on SES to SES `verified email`.
 
 
 ## Description
 
-A RUST service for AWS Lambda that uses the inbound/outbound capabilities of AWS SES to run a serverless email forwarding service.
+A RUST service that uses the inbound/outbound capabilities of AWS SES to forwared emails from verfied domains to a verified email address.
 For example, if an email is sent from `john@doe.example` to `achu@fufu.soup` is forwarded to a verified email `onions@suya.io`.
 This service processes the `From` and `Reply-To` headers set as follows:
 ```
@@ -35,13 +35,26 @@ received by -- <onions@suya.io>
 ## Build
 
 1. Edit the `terraform/variables.tf` file accordingly to suit your needs.
-
-2. Test build locally.
+2. If you're using S3 as your backend, you'll need to make changes to `terraform/main.tf`
+3. Test build locally.
 ```bash
 $ cargo build
 $ cargo test
 ```
 
+### Infrastructure Provisioning
+1. Verify your domain and email address on SES before running this
+2. Create a terraform Token which has admin access to your AWS Account
+3. Build and generate your Lambda.zip in the terraform directory
+3. Provision infrastructure
+```bash
+$ cd terraform
+$ terraform init
+$ terraform validate -json
+$ terraform plan
+$ terraform apply
+```
+Alternately, you can run the `release.sh` and it builds your code and provisions your infrastructure.
 
 ## Contributing
 We would appreciate your contributions, all PRs are wellcome. Please see [CONTRIBUTING.md]() for more information.
