@@ -132,6 +132,15 @@ pub struct Verdict {
     status: String,
 }
 
+/// process_email: Process the email metadata,
+///     cleaning up and removing unnecessary headers
+///     before fowarding email to recipient.
+fn process_email(input: &str) -> Option<&str> {
+    let start = input.find("<html>")?;
+    let end = input.rfind("</html>")? + 7;
+    Some(&input[start..end])
+}
+
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
 pub(crate) async fn privatemail_handler(
@@ -150,14 +159,10 @@ pub(crate) async fn privatemail_handler(
 
     // Fetch request payload
     let sns_payload = event["Records"][0]["Sns"].as_object().unwrap();
-    info!("Raw Email Info: {:?}", sns_payload);
+    // info!("Raw Email Info: {:?}", sns_payload);
 
     let sns_message: EmailReceiptNotification =
         serde_json::from_str(sns_payload["Message"].as_str().unwrap())?;
-    info!("Parsed SES Message: {:#?}", sns_message);
-    info!("Parsed SES Message Mail: {:#?}", sns_message.mail);
-    info!("Parsed SES Message Receipt: {:#?}", sns_message.receipt);
-    info!("Parsed SES Message content: {:#?}", sns_message.content);
 
     // skip spam messages
     if sns_message.receipt.spam_verdict.status == "FAIL"
@@ -165,15 +170,13 @@ pub(crate) async fn privatemail_handler(
     {
         warn!("Message contains spam or virus, skipping!");
         process::exit(200);
-        // Ok(LambdaResponse(200, "message skipped"))
     }
+
     // Rewrite Email From header to contain sender's name with forwarder's email address
     let original_sender: String = sns_message.mail.common_headers.return_path;
-
     let subject: String = sns_message.mail.common_headers.subject;
-    // <<<< The bug is extracting the email from the JSON <<<< //
-
-    let mail_content: String = sns_message.content;
+    let mail_content: String =
+        process_email(&sns_message.content).unwrap_or_default().to_string();
 
     info!("sender: {:#?}", original_sender);
     info!("Subject: {:#?}", subject);
