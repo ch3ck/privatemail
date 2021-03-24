@@ -1,7 +1,7 @@
 # GitHub Actions workflow to deploy Lambda functions with RUST runtime
 # Author: Nyah Check
 
-name: Rust
+name: Build code & Run Tests
 
 on:
   push:
