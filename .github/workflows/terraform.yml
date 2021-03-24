@@ -1,7 +1,7 @@
 # GitHub Actions workflow to create AWS resources for SES Lambda
 # Author: Nyah Check
 
-name: Terraform
+name: Provision Infrastructure with Terraform
 
 on:
   push:
