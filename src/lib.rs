@@ -135,10 +135,16 @@ pub struct Verdict {
 /// process_email: Process the email metadata,
 ///     cleaning up and removing unnecessary headers
 ///     before fowarding email to recipient.
-fn process_email(input: &str) -> Option<&str> {
-    let start = input.find("<html>")?;
-    let end = input.rfind("</html>")? + 7;
-    Some(&input[start..end])
+fn process_email(input: &str) -> &str {
+    info!("Raw Message: {:#?}", input);
+    let start = input.find("<!doctype").unwrap_or(
+        input.find("<html").unwrap_or(input.find("<div").unwrap_or_default()),
+    );
+    let end = input
+        .rfind("</html>")
+        .unwrap_or(input.rfind("</div>").unwrap_or_default())
+        + 7;
+    &input[start..end]
 }
 
 /// PrivatEmail_Handler: processes incoming messages from SNS
@@ -175,8 +181,7 @@ pub(crate) async fn privatemail_handler(
     // Rewrite Email From header to contain sender's name with forwarder's email address
     let original_sender: String = sns_message.mail.common_headers.return_path;
     let subject: String = sns_message.mail.common_headers.subject;
-    let mail_content: String =
-        process_email(&sns_message.content).unwrap_or_default().to_string();
+    let mail_content: String = process_email(&sns_message.content).to_string();
 
     info!("sender: {:#?}", original_sender);
     info!("Subject: {:#?}", subject);
@@ -248,8 +253,8 @@ mod tests {
     #[tokio::test]
     #[ignore = "skipping integration because because of IAM requirements"]
     async fn handler_handles() {
-        env::set_var("TO_EMAIL", "test@nyah.dev");
-        env::set_var("FROM_EMAIL", "achu@fufu.africa");
+        env::set_var("TO_EMAIL", "nyah@hey.com");
+        env::set_var("FROM_EMAIL", "test@nyah.dev");
         let test_event = read_test_event();
 
         assert_eq!(
@@ -257,7 +262,7 @@ mod tests {
                 .await
                 .expect("expected Ok(_) response")
                 .status_code,
-            200
+            400
         )
     }
 }

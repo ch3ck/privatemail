@@ -55,3 +55,4 @@ terraform.rc
 
 # lambda code
 lambda.zip
+*.json
