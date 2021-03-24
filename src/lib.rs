@@ -23,6 +23,7 @@
 mod config;
 
 use lambda_runtime::{Context, Error};
+use mailparse::*;
 use rusoto_core::Region;
 use rusoto_ses::{
     Body, Content, Destination, Message, SendEmailRequest, Ses, SesClient,
@@ -132,21 +133,6 @@ pub struct Verdict {
     status: String,
 }
 
-/// process_email: Process the email metadata,
-///     cleaning up and removing unnecessary headers
-///     before fowarding email to recipient.
-fn process_email(input: &str) -> &str {
-    info!("Raw Message: {:#?}", input);
-    let start = input.find("<!doctype").unwrap_or(
-        input.find("<html").unwrap_or(input.find("<div").unwrap_or_default()),
-    );
-    let end = input
-        .rfind("</html>")
-        .unwrap_or(input.rfind("</div>").unwrap_or_default())
-        + 7;
-    &input[start..end]
-}
-
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
 pub(crate) async fn privatemail_handler(
@@ -181,8 +167,9 @@ pub(crate) async fn privatemail_handler(
     // Rewrite Email From header to contain sender's name with forwarder's email address
     let original_sender: String = sns_message.mail.common_headers.return_path;
     let subject: String = sns_message.mail.common_headers.subject;
-    let mail_content: String = process_email(&sns_message.content).to_string();
 
+    let parsed_mail = parse_mail(&sns_message.content.as_bytes()).unwrap();
+    let mail_content: String = parsed_mail.subparts[1].get_body().unwrap();
     info!("sender: {:#?}", original_sender);
     info!("Subject: {:#?}", subject);
     info!("To Email: {:#?}", email_config.to_email.to_string());
