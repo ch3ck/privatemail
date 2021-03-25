@@ -170,6 +170,7 @@ pub(crate) async fn privatemail_handler(
 
     let parsed_mail = parse_mail(&sns_message.content.as_bytes()).unwrap();
     let mail_content: String = parsed_mail.subparts[1].get_body().unwrap();
+    let mail_txt: String = parsed_mail.subparts[0].get_body().unwrap();
     info!("sender: {:#?}", original_sender);
     info!("Subject: {:#?}", subject);
     info!("To Email: {:#?}", email_config.to_email.to_string());
@@ -188,7 +189,10 @@ pub(crate) async fn privatemail_handler(
                     charset: Some(String::from("utf-8")),
                     data: mail_content,
                 }),
-                text: None,
+                text: Some(Content {
+                    charset: Some(String::from("utf-8")),
+                    data: mail_txt,
+                }),
             },
             subject: Content {
                 charset: Some(String::from("utf-8")),
