@@ -1,6 +1,7 @@
 # privatemail
 
 [![Rust](https://github.com/ch3ck/privatemail/actions/workflows/rust.yml/badge.svg?branch=master)](https://github.com/ch3ck/privatemail/actions/workflows/rust.yml)
+[![Run Security Audit](https://github.com/ch3ck/privatemail/actions/workflows/security.yml/badge.svg)](https://github.com/ch3ck/privatemail/actions/workflows/security.yml)
 [![Terraform](https://github.com/ch3ck/privatemail/actions/workflows/terraform.yml/badge.svg?branch=master)](https://github.com/ch3ck/privatemail/actions/workflows/terraform.yml)
 
 [![forthebadge](https://forthebadge.com/images/badges/powered-by-black-magic.svg)](https://github.com/ch3ck/privatemail)
