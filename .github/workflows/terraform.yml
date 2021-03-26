@@ -1,17 +1,19 @@
 # GitHub Actions workflow to create AWS resources for SES Lambda
 # Author: Nyah Check
-
-name: Provision Infrastructure with Terraform
+name: Package Code & Provision Infrastructure
 
 on:
   push:
-    branches: [ master ]
-
+    branches:
+      - "!*"
+    tags:
+      - "v*"
 
 jobs:
   terraform-infra-provisioning:
     name: "Terraform"
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v2
         with:
@@ -46,4 +48,4 @@ jobs:
         run: terraform plan terraform
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-        run: terraform apply terraform
+        run: terraform apply -auto-approve terraform
