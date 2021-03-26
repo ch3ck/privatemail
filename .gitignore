@@ -56,3 +56,6 @@ terraform.rc
 # lambda code
 lambda.zip
 *.json
+
+# secrets file
+*.secrets

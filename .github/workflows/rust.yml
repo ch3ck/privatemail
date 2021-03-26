@@ -1,7 +1,6 @@
 # GitHub Actions workflow to deploy Lambda functions with RUST runtime
 # Author: Nyah Check
-
-name: Build code & Run Tests
+name: Build & Run Tests
 
 on:
   push:
@@ -11,19 +10,7 @@ on:
 
 
 jobs:
-  run-security_audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Run code audit
-        run: |
-          cargo install cargo-audit --features=fix
-          cargo audit fix
-      - name: Check style
-        run: |
-          rustup toolchain install nightly
-          rustup component add rustfmt --toolchain nightly-x86_64-unknown-linux-gnu
-  build-and-test:
+  build-and-run-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
