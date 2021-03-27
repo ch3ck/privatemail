@@ -11,8 +11,10 @@ zip -j lambda.zip ./target/x86_64-unknown-linux-musl/release/bootstrap
 cp lambda.zip terraform/
 
 echo "Terraform Provisioning"
+terraform init terraform
 terraform validate -json terraform
-terraplan plan terraform
-terraform apply terraform
+terraform plan terraform
+terraform apply -auto-approve terraform
 
 echo ">>>>>Release complete<<<<"
+set -eux
