@@ -56,7 +56,6 @@ data "aws_iam_policy_document" "ses_email_forward_policy_document" {
 
     actions = [
       "ses:SendEmail",
-      "ses:SendRawEmail",
     ]
 
     resources = [
@@ -132,7 +131,7 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
 resource "aws_iam_policy" "cloudwatch_lambda_logs" {
   name        = "cloudwatch_lambda_logs"
   path        = "/"
-  description = "IAM policy for logging from a lambda"
+  description = "IAM policy for Lambda logging"
 
   policy = <<EOF
 {
