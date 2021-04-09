@@ -175,7 +175,8 @@ resource "aws_lambda_function" "ses-email-forward-lambda" {
     variables = {
       RUST_BACKTRACE = 1,
       FROM_EMAIL     = var.from_email,
-      TO_EMAIL       = var.to_email
+      TO_EMAIL       = var.to_email,
+      BLACK_LIST     = var.black_list
     }
   }
 }
