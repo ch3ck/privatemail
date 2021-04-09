@@ -51,7 +51,10 @@ impl PrivatEmailConfig {
     /// Create new PrivatEmailConfig struct from environment variables.
     pub fn new_from_env() -> Self {
         let b_list = env::var("BLACK_LIST").unwrap_or_default();
-        let black_list = b_list.split(",").map(|x| String::from(x)).collect();
+        let black_list = b_list
+            .split(",")
+            .map(|x| String::from(x.replace(" ", "")))
+            .collect();
 
         PrivatEmailConfig {
             from_email: env::var("FROM_EMAIL")
@@ -70,8 +73,10 @@ impl PrivatEmailConfig {
         B: ToString,
     {
         let b_list_vec = black_list.to_string();
-        let b_list: Vec<String> =
-            b_list_vec.split(",").map(|x| String::from(x)).collect();
+        let b_list: Vec<String> = b_list_vec
+            .split(",")
+            .map(|x| String::from(x.replace(" ", "")))
+            .collect();
         PrivatEmailConfig {
             from_email: from_email.to_string(),
             to_email: to_email.to_string(),
@@ -91,7 +96,7 @@ mod tests {
         let new_config = PrivatEmailConfig::new(
             String::from("test_from"),
             String::from("test_to"),
-            String::from("fake@email.t,second@fake.email"),
+            String::from("fake@email.t, second@fake.email"),
         );
         assert_eq!(new_config.from_email.contains("test_from"), true);
         assert_eq!(new_config.to_email.contains("test_to"), true);
