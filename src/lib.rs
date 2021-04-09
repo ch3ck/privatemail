@@ -20,7 +20,7 @@
 //! }
 //! ```
 #![allow(clippy::field_reassign_with_default)]
-mod config;
+use config::PrivatEmailConfig;
 
 use lambda_runtime::{Context, Error};
 use mailparse::*;
