@@ -41,25 +41,23 @@ use tracing::{error, info, warn};
 #[derive(Debug, Default, Clone, Serialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct LambdaResponse {
-    /** is_base_64_encoded response field */
+    /// is_base_64_encoded response field
     is_base_64_encoded: bool,
 
-    /** status_code for lambda response */
+    /// status_code for lambda response
     status_code: u32,
 
-    /** response headers for lambda response */
+    /// response headers for lambda response
     headers: HashMap<String, String>,
 
-    /** response body for LambdaResponse struct */
+    /// response body for LambdaResponse struct
     body: String,
 }
 
 impl LambdaResponse {
-    /**
-     *  Given a status_code and response body a new LambdaResponse
-     *  is returned to the calling function
-     * */
-    pub fn new(status_code: u32, body: String) -> Self {
+    /// Given a status_code and response body a new LambdaResponse
+    /// is returned to the calling function
+    pub fn new(status_code: u32, body: &str) -> Self {
         let mut header = HashMap::new();
         header.insert("content-type".to_owned(), "application/json".to_owned());
         LambdaResponse {
@@ -147,7 +145,7 @@ pub(crate) async fn privatemail_handler(
     let ses_client = SesClient::new(Region::UsEast1);
 
     // Initialize the PrivatEmailConfig object
-    let email_config = config::PrivatEmailConfig::new_from_env();
+    let email_config = PrivatEmailConfig::new_from_env();
 
     // Fetch request payload
     let sns_payload = event["Records"][0]["Sns"].as_object().unwrap();
@@ -171,7 +169,7 @@ pub(crate) async fn privatemail_handler(
     let parsed_mail = parse_mail(&sns_message.content.as_bytes()).unwrap();
     let mail_content: String = parsed_mail.subparts[1].get_body().unwrap();
     let mail_txt: String = parsed_mail.subparts[0].get_body().unwrap();
-    info!("sender: {:#?}", original_sender);
+    info!("Sender: {:#?}", original_sender);
     info!("Subject: {:#?}", subject);
     info!("To Email: {:#?}", email_config.to_email.to_string());
     info!("Content: {:#?}", mail_content);
@@ -210,7 +208,7 @@ pub(crate) async fn privatemail_handler(
     match ses_client.send_email(ses_email_message).await {
         Ok(email_response) => {
             info!("Email forward success: {:?}", email_response);
-            Ok(LambdaResponse::new(200, email_response.message_id))
+            Ok(LambdaResponse::new(200, &email_response.message_id))
         }
         Err(error) => {
             error!("Error forwarding email: {:?}", error);
@@ -219,7 +217,7 @@ pub(crate) async fn privatemail_handler(
     }
 }
 
-/** Test module for privatemail package */
+/// Test module for privatemail package
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -244,14 +242,14 @@ mod tests {
     #[tokio::test]
     #[ignore = "skipping integration because because of IAM requirements"]
     async fn handler_handles() {
-        env::set_var("TO_EMAIL", "nyah@hey.com");
+        env::set_var("TO_EMAIL", "onions@suya.io");
         env::set_var("FROM_EMAIL", "test@nyah.dev");
         let test_event = read_test_event();
 
         assert_eq!(
             privatemail_handler(test_event, Context::default())
                 .await
-                .expect("expected Ok(_) response")
+                .expect("expected Err(_) response")
                 .status_code,
             400
         )
