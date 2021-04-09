@@ -15,7 +15,7 @@ documentation = "https://docs.rs/privatemail"
 
 [lib]
 name = "config"
-path = "src/lib/config.rs"
+path = "src/config.rs"
 
 [profile.release]
 overflow-checks = true
