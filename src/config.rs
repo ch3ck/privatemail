@@ -8,20 +8,20 @@
 //! - Nyah Check <hello@nyah.dev>
 //! GPG signature verification.
 
-//! Configuration struct for PrivatEmail
+//! Configuration struct for `PrivatEmail`
 #![allow(clippy::style)]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::env;
 
-/// Config object for PrivatEmail.
+/// Config object for `PrivatEmail`.
 ///
 /// Implements [`serde::Deserialize`] and [`serde::Serialize`] and
 /// can be composed with other consumer configs.
-/// PrivatEmailConfig:
-///  from_email: Original Recipient Email from Verified SES Domain
-///  to_email: Recipient SES verified email address which receives the forwarded email
-///  black_list: Black listed email addresses.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+///  `PrivatEmailConfig`:
+///  `from_email`: Original Recipient Email from Verified SES Domain
+///  `to_email`: Recipient SES verified email address which receives the forwarded email
+///  `black_list`: Black listed email addresses.
+#[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(default)]
 pub struct PrivatEmailConfig {
     /// Original Recipient Email from Verified SES Domain
@@ -35,7 +35,7 @@ pub struct PrivatEmailConfig {
     pub black_list: Option<Vec<String>>,
 }
 
-/// Default configuration for PrivatEmailConfig
+/// Default configuration for `PrivatEmailConfig`
 impl Default for PrivatEmailConfig {
     fn default() -> Self {
         PrivatEmailConfig {
@@ -46,7 +46,7 @@ impl Default for PrivatEmailConfig {
     }
 }
 
-/// Create a new PrivatEmailConfig client struct from environment variables.
+/// Create a new `PrivatEmailConfig` client struct from environment variables.
 impl PrivatEmailConfig {
     /// Create new PrivatEmailConfig struct from environment variables.
     pub fn new_from_env() -> Self {
@@ -62,12 +62,13 @@ impl PrivatEmailConfig {
         }
     }
 
-    /// Create a new PrivatEmailConfig struct
-    pub fn new<F, T, B>(
-        from_email: impl ToString,
-        to_email: impl ToString,
-        black_list: impl ToString,
-    ) -> Self {
+    /// Create a new `PrivatEmailConfig` struct
+    pub fn new<F, T, B>(from_email: F, to_email: T, black_list: B) -> Self
+    where
+        F: ToString,
+        T: ToString,
+        B: ToString,
+    {
         let b_list_vec = black_list.to_string();
         let b_list: Vec<String> =
             b_list_vec.split(",").map(|x| String::from(x)).collect();
@@ -90,7 +91,7 @@ mod tests {
         let new_config = PrivatEmailConfig::new(
             String::from("test_from"),
             String::from("test_to"),
-            String::from("fake@email.t, second@fake.email"),
+            String::from("fake@email.t,second@fake.email"),
         );
         assert_eq!(new_config.from_email.contains("test_from"), true);
         assert_eq!(new_config.to_email.contains("test_to"), true);
@@ -99,7 +100,6 @@ mod tests {
             ["fake@email.t", "second@fake.email"]
         );
     }
-
     #[test]
     fn test_default_privatemail_config() {
         let new_config = PrivatEmailConfig::default();

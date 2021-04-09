@@ -16,7 +16,7 @@ A RUST service that uses the inbound/outbound capabilities of AWS SES to forware
 For example, if an email is sent from `john@doe.example` to `achu@fufu.soup` is forwarded to a verified email `onions@suya.io`.
 This service processes the `From` and `Reply-To` headers set as follows:
 ```
-From: John Doe at john@doe.example <achu@fufu.soup>
+From: John Doe <achu@fufu.soup>
 Reply-To: john@doe.example
 
 <html>Email body</html>
