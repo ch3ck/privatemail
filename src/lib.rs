@@ -39,10 +39,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt::Debug;
-use std::fmt;
 
-use tracing::{error, info, Level};
-use tracing_subscriber::FmtSubscriber;
+use tracing::{subscriber::set_global_default, Subscriber};
+use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
+use tracing_log::LogTracer;
+use tracing_subscriber::{layer::SubscriberExt, EnvFilter, Registry};
 
 /// LambdaResponse: The Outgoing response being passed by the Lambda
 #[derive(Debug, Default, Clone, Serialize)]
@@ -76,8 +77,8 @@ impl LambdaResponse {
     }
 }
 
-impl fmt::Display for LambdaResponse {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for LambdaResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
             "LambdaResponse: status_code: {}, body: {}",
@@ -137,6 +138,45 @@ pub struct Verdict {
     status: String,
 }
 
+/// Compose multiple layers into a `tracing` subscriber.
+///
+/// # Notes
+///
+/// We are using `impl Subscriber` as return type to avoid having to
+/// spell out the actual type of the returned subscriber, which is
+/// indeed quite complex.
+/// We need to explicitly call out that the returned subscriber is
+/// `Send` and `Sync` to make it possible to pass it to `init_subscriber`
+/// later on.
+pub fn get_subscriber(
+    name: String,
+    env_filter: String,
+) -> impl Subscriber + Send + Sync {
+    let env_filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::new(env_filter));
+    let formatting_layer = BunyanFormattingLayer::new(name, std::io::stdout);
+    Registry::default()
+        .with(env_filter)
+        .with(JsonStorageLayer)
+        .with(formatting_layer)
+}
+
+/// Register a subscriber as global default to process span data.
+///
+/// It should only be called once!
+pub fn init_subscriber(subscriber: impl Subscriber + Send + Sync) {
+    LogTracer::init().expect("Failed to set logger");
+    set_global_default(subscriber).expect("Failed to set subscriber");
+}
+
+// Ensure that the `tracing` stack is only initialised once using `lazy_static`
+lazy_static::lazy_static! {
+    static ref TRACING: () = {
+        let subscriber = get_subscriber("privatemail".into(), "info".into());
+        init_subscriber(subscriber);
+    };
+}
+
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
 pub(crate) async fn privatemail_handler(
@@ -144,17 +184,10 @@ pub(crate) async fn privatemail_handler(
     ctx: Context,
 ) -> Result<LambdaResponse, Error> {
     // install global collector configured based on RUST_LOG env var
-    let subscriber = FmtSubscriber::builder()
-        // filter events with level TRACE or higher
-        .with_max_level(Level::TRACE)
-        // build without subscriber
-        .finish();
-
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("setting default subsciber failed");
+    lazy_static::initialize(&TRACING);
 
     // Enable Cloudwatch error logging at runtime
-    info!(
+    tracing::info!(
         "Event: {:#?}, Context: {:#?}",
         event.as_object().unwrap_or_else(|| panic!("Missing event object")),
         ctx
@@ -170,7 +203,7 @@ pub(crate) async fn privatemail_handler(
     let sns_payload = event["Records"][0]["Sns"]
         .as_object()
         .unwrap_or_else(|| panic!("Missing sns payload"));
-    // info!("Raw Email Info: {:?}", sns_payload);
+    // tracing::info!("Raw Email Info: {:?}", sns_payload);
 
     let sns_message: EmailReceiptNotification = serde_json::from_str(
         sns_payload["Message"]
@@ -183,7 +216,7 @@ pub(crate) async fn privatemail_handler(
         || sns_message.receipt.virus_verdict.status == "FAIL"
     {
         let err_msg = "Message contains spam or virus, skipping!";
-        info!(err_msg);
+        tracing::info!(err_msg);
         return Ok(LambdaResponse::new(200, err_msg));
         // process::exit(200);
     }
@@ -193,13 +226,13 @@ pub(crate) async fn privatemail_handler(
     let subject: String = sns_message.mail.common_headers.subject;
 
     let parsed_mail = parse_mail(&sns_message.content.as_bytes()).unwrap();
-    let mail_content: String = parsed_mail.subparts[1].get_body().unwrap();
-    let mail_txt: String = parsed_mail.subparts[0].get_body().unwrap();
-    info!("Sender: {:#?}", original_sender);
-    info!("Subject: {:#?}", subject);
-    info!("To Email: {:#?}", email_config.to_email.to_string());
-    info!("Black List: {:#?}", email_config.black_list);
-    info!("Content: {:#?}", mail_content);
+    let mail_content = parsed_mail.subparts[1].get_body_raw().unwrap();
+    let mail_txt = parsed_mail.subparts[0].get_body_raw().unwrap();
+    tracing::info!("Sender: {:#?}", original_sender);
+    tracing::info!("Subject: {:#?}", subject);
+    tracing::info!("To Email: {:#?}", email_config.to_email.to_string());
+    tracing::info!("Black List: {:#?}", email_config.black_list);
+    tracing::info!("Content: {:#?}", mail_content);
 
     // Skip mail if it's from blacklisted email
     for email in
@@ -209,7 +242,7 @@ pub(crate) async fn privatemail_handler(
             let mut err_msg: String =
                 "Message is from blacklisted email: ".to_owned();
             err_msg.push_str(email.as_str());
-            info!("`{}`, skipping!", err_msg.as_str());
+            tracing::info!("`{}`, skipping!", err_msg.as_str());
             return Ok(LambdaResponse::new(200, err_msg.as_str()));
         }
     }
@@ -225,11 +258,11 @@ pub(crate) async fn privatemail_handler(
             body: Body {
                 html: Some(Content {
                     charset: Some(String::from("utf-8")),
-                    data: mail_content,
+                    data: String::from_utf8(mail_content).unwrap(),
                 }),
                 text: Some(Content {
                     charset: Some(String::from("utf-8")),
-                    data: mail_txt,
+                    data: String::from_utf8(mail_txt).unwrap(),
                 }),
             },
             subject: Content {
@@ -247,11 +280,11 @@ pub(crate) async fn privatemail_handler(
 
     match ses_client.send_email(ses_email_message).await {
         Ok(email_response) => {
-            info!("Email forward success: {:?}", email_response);
+            tracing::info!("Email forward success: {:?}", email_response);
             Ok(LambdaResponse::new(200, &email_response.message_id))
         }
         Err(error) => {
-            error!("Error forwarding email: {:?}", error);
+            tracing::error!("Error forwarding email: {:?}", error);
             Err(Box::new(error))
         }
     }
@@ -275,14 +308,14 @@ mod tests {
 
         // Read the JSON contents of the file as an instance of `String`.
         let input_str = fs::read_to_string(srcdir.as_path()).unwrap();
-        info!("Input str: {}", input_str);
+        tracing::info!("Input str: {}", input_str);
 
         // Return the `Value`.
         return serde_json::from_str(input_str.as_str()).unwrap();
     }
 
     #[tokio::test]
-    #[ignore = "skipping integration because of IAM requirements"]
+    // #[ignore = "skipping integration because of IAM requirements"]
     async fn handler_handles() {
         env::set_var("TO_EMAIL", "test@nyah.dev");
         env::set_var("FROM_EMAIL", "onions@suya.io");
