@@ -174,6 +174,14 @@ pub(crate) async fn privatemail_handler(
     info!("To Email: {:#?}", email_config.to_email.to_string());
     info!("Content: {:#?}", mail_content);
 
+    // Skip mail if it's from blacklisted email
+    for email in email_config.black_list.unwrap() {
+        if original_sender.contains(email.as_str()) {
+            warn!("Message is from Blacklisted email: `{}`, skipping!", email);
+            process::exit(200);
+        }
+    }
+
     let ses_email_message = SendEmailRequest {
         configuration_set_name: None,
         destination: Destination {
@@ -224,11 +232,13 @@ mod tests {
     use std::path::PathBuf;
     use std::{env, fs};
 
-    fn read_test_event() -> Value {
+    fn read_test_event(file_name: String) -> Value {
         // Open the file in read-only mode with buffer.
 
         let mut srcdir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        srcdir.push("tests/payload/testEvent.json");
+        let mut file_dir: String = "tests/payload/".to_owned();
+        file_dir.push_str(file_name.as_str());
+        srcdir.push(file_dir.as_str());
         println!("Cur Dir: {}", srcdir.display());
 
         // Read the JSON contents of the file as an instance of `String`.
@@ -244,14 +254,30 @@ mod tests {
     async fn handler_handles() {
         env::set_var("TO_EMAIL", "onions@suya.io");
         env::set_var("FROM_EMAIL", "test@nyah.dev");
-        let test_event = read_test_event();
+        let test_event = read_test_event(String::from("test_event.json"));
 
         assert_eq!(
             privatemail_handler(test_event, Context::default())
                 .await
-                .expect("expected Err(_) response")
+                .expect("expected Ok(_) response")
                 .status_code,
-            400
+            200
+        )
+    }
+
+    #[tokio::test]
+    async fn handler_with_black_listed_email() {
+        env::set_var("TO_EMAIL", "onions@suya.io");
+        env::set_var("FROM_EMAIL", "test@nyah.dev");
+        env::set_var("BLACK_LIST", "fufu.soup");
+        let test_event = read_test_event(String::from("test_event.json"));
+
+        assert_eq!(
+            privatemail_handler(test_event, Context::default())
+                .await
+                .expect("expected Ok(_) response")
+                .status_code,
+            200
         )
     }
 }
