@@ -154,7 +154,7 @@ pub(crate) async fn privatemail_handler(
     );
 
     // create ses client
-    let ses_client = SesClient::new(Region::UsEast1);
+    let ses_client = SesClient::new(Region::default());
 
     // Initialize the PrivatEmailConfig object
     let email_config = PrivatEmailConfig::new_from_env();
