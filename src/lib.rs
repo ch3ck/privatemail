@@ -172,6 +172,7 @@ pub(crate) async fn privatemail_handler(
     info!("Sender: {:#?}", original_sender);
     info!("Subject: {:#?}", subject);
     info!("To Email: {:#?}", email_config.to_email.to_string());
+    info!("Black List: {:#?}", email_config.black_list);
     info!("Content: {:#?}", mail_content);
 
     // Skip mail if it's from blacklisted email
@@ -266,6 +267,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "skipping integration because because of IAM requirements"]
     async fn handler_with_black_listed_email() {
         env::set_var("TO_EMAIL", "onions@suya.io");
         env::set_var("FROM_EMAIL", "test@nyah.dev");
