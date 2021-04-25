@@ -34,7 +34,7 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::{fmt, process};
 
-use tracing::{error, info, warn, Level};
+use tracing::{error, info, Level};
 use tracing_subscriber::FmtSubscriber;
 
 /// LambdaResponse: The Outgoing response being passed by the Lambda
@@ -147,7 +147,11 @@ pub(crate) async fn privatemail_handler(
         .expect("setting default subsciber failed");
 
     // Enable Cloudwatch error logging at runtime
-    info!("Event: {:#?}, Context: {:#?}", event.as_object().unwrap(), ctx);
+    info!(
+        "Event: {:#?}, Context: {:#?}",
+        event.as_object().unwrap_or_else(|| panic!("Missing event object")),
+        ctx
+    );
 
     // create ses client
     let ses_client = SesClient::new(Region::UsEast1);
@@ -156,17 +160,22 @@ pub(crate) async fn privatemail_handler(
     let email_config = PrivatEmailConfig::new_from_env();
 
     // Fetch request payload
-    let sns_payload = event["Records"][0]["Sns"].as_object().unwrap();
+    let sns_payload = event["Records"][0]["Sns"]
+        .as_object()
+        .unwrap_or_else(|| panic!("Missing sns payload"));
     // info!("Raw Email Info: {:?}", sns_payload);
 
-    let sns_message: EmailReceiptNotification =
-        serde_json::from_str(sns_payload["Message"].as_str().unwrap())?;
+    let sns_message: EmailReceiptNotification = serde_json::from_str(
+        sns_payload["Message"]
+            .as_str()
+            .unwrap_or_else(|| panic!("Missing Message field")),
+    )?;
 
     // skip spam messages
     if sns_message.receipt.spam_verdict.status == "FAIL"
         || sns_message.receipt.virus_verdict.status == "FAIL"
     {
-        warn!("Message contains spam or virus, skipping!");
+        info!("Message contains spam or virus, skipping!");
         process::exit(200);
     }
 
@@ -184,9 +193,11 @@ pub(crate) async fn privatemail_handler(
     info!("Content: {:#?}", mail_content);
 
     // Skip mail if it's from blacklisted email
-    for email in email_config.black_list.unwrap() {
+    for email in
+        email_config.black_list.unwrap_or_else(|| panic!("Missing black list"))
+    {
         if original_sender.contains(email.as_str()) {
-            warn!("Message is from Blacklisted email: `{}`, skipping!", email);
+            info!("Message is from Blacklisted email: `{}`, skipping!", email);
             process::exit(200);
         }
     }
