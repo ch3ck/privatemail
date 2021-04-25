@@ -1,9 +1,14 @@
-//! Copyright 2021 Nyah Check crate.
+//! -*- mode: rust; -*-
 //!
-//! privatemail - AWS Lambda SES Forwarder - v1.0.0
-//! This service is for forwarding reaw emails from S3 to SES.
-//! Configures S3 bucket with required prefixes to store raw emails and mapping for email addresses
-//! needed to forwared the emails.
+//! This file is part of privatemail crate.
+//! Copyright (c) 2021 Nyah Check
+//! See LICENSE for licensing information.
+//!
+//! privatemail - This service is for forwarding raw from SES.
+//!
+//!
+//! Authors:
+//! - Nyah Check <hello@nyah.dev>
 #![allow(clippy::style)]
 mod lib;
 use lambda_runtime::{handler_fn, Error};

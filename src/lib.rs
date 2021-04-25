@@ -1,6 +1,13 @@
+//! -*- mode: rust; -*-
+//!
+//! This file is part of privatemail crate.
+//! Copyright (c) 2021 Nyah Check
+//! See LICENSE for licensing information.
 //!
 //! A rust library for handling SNS requests to Lambda.
 //!
+//! Authors:
+//! - Nyah Check <hello@nyah.dev>
 //!
 //! Example:
 //!
