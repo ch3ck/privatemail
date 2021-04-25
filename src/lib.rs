@@ -279,8 +279,8 @@ mod tests {
     #[tokio::test]
     #[ignore = "skipping integration because because of IAM requirements"]
     async fn handler_handles() {
-        env::set_var("TO_EMAIL", "onions@suya.io");
-        env::set_var("FROM_EMAIL", "test@nyah.dev");
+        env::set_var("TO_EMAIL", "test@nyah.dev");
+        env::set_var("FROM_EMAIL", "onions@suya.io");
         let test_event = read_test_event(String::from("test_event.json"));
 
         assert_eq!(
@@ -295,8 +295,8 @@ mod tests {
     #[tokio::test]
     #[ignore = "skipping integration because because of IAM requirements"]
     async fn handler_with_black_listed_email() {
-        env::set_var("TO_EMAIL", "onions@suya.io");
-        env::set_var("FROM_EMAIL", "test@nyah.dev");
+        env::set_var("TO_EMAIL", "test@nyah.dev");
+        env::set_var("FROM_EMAIL", "onions@suya.io");
         env::set_var("BLACK_LIST", "fufu.soup");
         let test_event = read_test_event(String::from("test_event.json"));
 
