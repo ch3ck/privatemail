@@ -27,7 +27,7 @@ variable "to_email" {
 }
 
 variable "black_list" {
-  default = "rebtel.com, m1finance.com, theknot.com"
+  default     = "rebtel.com, m1finance.com, theknot.com"
   description = "Blacklisted emails/domains, comma separated list of stringsß"
 }
 
