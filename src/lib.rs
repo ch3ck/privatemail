@@ -30,12 +30,12 @@ use rusoto_ses::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use simple_logger::SimpleLogger;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::{fmt, process};
-use tracing::log::LevelFilter;
-use tracing::{error, info, warn};
+
+use tracing::{error, info, warn, Level};
+use tracing_subscriber::FmtSubscriber;
 
 /// LambdaResponse: The Outgoing response being passed by the Lambda
 #[derive(Debug, Default, Clone, Serialize)]
@@ -74,8 +74,7 @@ impl fmt::Display for LambdaResponse {
         write!(
             f,
             "LambdaResponse: status_code: {}, body: {}",
-            self.status_code,
-            self.body.to_string()
+            self.status_code, self.body
         )
     }
 }
@@ -137,8 +136,17 @@ pub(crate) async fn privatemail_handler(
     event: Value,
     ctx: Context,
 ) -> Result<LambdaResponse, Error> {
+    // install global collector configured based on RUST_LOG env var
+    let subscriber = FmtSubscriber::builder()
+        // filter events with level TRACE or higher
+        .with_max_level(Level::TRACE)
+        // build without subscriber
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("setting default subsciber failed");
+
     // Enable Cloudwatch error logging at runtime
-    SimpleLogger::new().with_level(LevelFilter::Info).init().unwrap();
     info!("Event: {:#?}, Context: {:#?}", event.as_object().unwrap(), ctx);
 
     // create ses client
