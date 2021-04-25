@@ -26,6 +26,11 @@ variable "to_email" {
   description = "AWS Verified email for forwarding your emails"
 }
 
+variable "black_list" {
+  default = "rebtel.com, m1finance.com, theknot.com"
+  description = "Blacklisted emails/domains, comma separated list of stringsß"
+}
+
 variable "region" {
   default     = "us-east-1"
   description = "AWS region for deployment"
