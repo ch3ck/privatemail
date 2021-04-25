@@ -203,10 +203,10 @@ pub(crate) async fn privatemail_handler(
     }
 
     let ses_email_message = SendEmailRequest {
-        configuration_set_name: None,
+        configuration_set_name: Default::default(),
         destination: Destination {
-            bcc_addresses: None,
-            cc_addresses: None,
+            bcc_addresses: Default::default(),
+            cc_addresses: Default::default(),
             to_addresses: Some(vec![email_config.to_email.to_string()]),
         },
         message: Message {
@@ -226,11 +226,11 @@ pub(crate) async fn privatemail_handler(
             },
         },
         reply_to_addresses: Some(vec![original_sender]),
-        return_path: None,
-        return_path_arn: None,
+        return_path: Default::default(),
+        return_path_arn: Default::default(),
         source: email_config.from_email.to_string(),
-        source_arn: None,
-        tags: None,
+        source_arn: Default::default(),
+        tags: Default::default(),
     };
 
     match ses_client.send_email(ses_email_message).await {
