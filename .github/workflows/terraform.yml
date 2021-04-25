@@ -37,15 +37,15 @@ jobs:
           TF_VAR_to_email: ${{ secrets.FROM_EMAIL }}
       - name: Terraform Format
         id: fmt
-        run: terraform fmt -check terraform
+        run: terraform -chdir=terraform fmt -check
       - name: Terraform init
         id: init
-        run: terraform init terraform
+        run: terraform -chdir=terraform init
       - name: Terraform Validate
         id: validate
-        run: terraform validate -json terraform
+        run: terraform validate -json
       - name: Terraform Plan
-        run: terraform plan terraform
+        run: terraform -chdir=terraform plan
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-        run: terraform apply -auto-approve terraform
+        run: terraform -chdir=terraform apply -auto-approve
