@@ -75,6 +75,8 @@ Set up the necessary keys on actions
 FROM_EMAIL
 TF_API_TOKEN
 TO_EMAIL
+AWS_REGION
+BLACK_LIST
 ```
 All deployments occur via GitHub Actions.
 
