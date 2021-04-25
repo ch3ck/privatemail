@@ -39,7 +39,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt::Debug;
-use std::{fmt, process};
+use std::fmt;
 
 use tracing::{error, info, Level};
 use tracing_subscriber::FmtSubscriber;
@@ -182,8 +182,10 @@ pub(crate) async fn privatemail_handler(
     if sns_message.receipt.spam_verdict.status == "FAIL"
         || sns_message.receipt.virus_verdict.status == "FAIL"
     {
-        info!("Message contains spam or virus, skipping!");
-        process::exit(200);
+        let err_msg = "Message contains spam or virus, skipping!";
+        info!(err_msg);
+        return Ok(LambdaResponse::new(200, err_msg));
+        // process::exit(200);
     }
 
     // Rewrite Email From header to contain sender's name with forwarder's email address
@@ -204,8 +206,11 @@ pub(crate) async fn privatemail_handler(
         email_config.black_list.unwrap_or_else(|| panic!("Missing black list"))
     {
         if original_sender.contains(email.as_str()) {
-            info!("Message is from Blacklisted email: `{}`, skipping!", email);
-            process::exit(200);
+            let mut err_msg: String =
+                "Message is from blacklisted email: ".to_owned();
+            err_msg.push_str(email.as_str());
+            info!("`{}`, skipping!", err_msg.as_str());
+            return Ok(LambdaResponse::new(200, err_msg.as_str()));
         }
     }
 
@@ -277,7 +282,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[ignore = "skipping integration because because of IAM requirements"]
+    #[ignore = "skipping integration because of IAM requirements"]
     async fn handler_handles() {
         env::set_var("TO_EMAIL", "test@nyah.dev");
         env::set_var("FROM_EMAIL", "onions@suya.io");
@@ -293,11 +298,10 @@ mod tests {
     }
 
     #[tokio::test]
-    #[ignore = "skipping integration because because of IAM requirements"]
     async fn handler_with_black_listed_email() {
         env::set_var("TO_EMAIL", "test@nyah.dev");
         env::set_var("FROM_EMAIL", "onions@suya.io");
-        env::set_var("BLACK_LIST", "fufu.soup");
+        env::set_var("BLACK_LIST", "achu.soup");
         let test_event = read_test_event(String::from("test_event.json"));
 
         assert_eq!(
