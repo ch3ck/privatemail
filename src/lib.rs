@@ -227,18 +227,16 @@ pub(crate) async fn privatemail_handler(
 
     let parsed_mail = parse_mail(&sns_message.content.as_bytes()).unwrap();
     let mail_content = parsed_mail.subparts[1].get_body_raw().unwrap();
-    let mail_txt = parsed_mail.subparts[0].get_body_raw().unwrap();
-    tracing::info!("Sender: {:#?}", original_sender);
-    tracing::info!("Subject: {:#?}", subject);
-    tracing::info!("To Email: {:#?}", email_config.to_email.to_string());
-    tracing::info!("Black List: {:#?}", email_config.black_list);
-    tracing::info!("Content: {:#?}", mail_content);
+    let msg_body = charset::decode_latin1(&mail_content).to_string();
+    tracing::info!("HTML content: {:#?}", mail_content);
 
     // Skip mail if it's from blacklisted email
     for email in
         email_config.black_list.unwrap_or_else(|| panic!("Missing black list"))
     {
-        if original_sender.contains(email.as_str()) {
+        if !email.as_str().is_empty()
+            && original_sender.contains(email.as_str())
+        {
             let mut err_msg: String =
                 "Message is from blacklisted email: ".to_owned();
             err_msg.push_str(email.as_str());
@@ -257,18 +255,12 @@ pub(crate) async fn privatemail_handler(
         message: Message {
             body: Body {
                 html: Some(Content {
-                    charset: Some(String::from("utf-8")),
-                    data: String::from_utf8(mail_content).unwrap(),
+                    charset: Default::default(),
+                    data: msg_body,
                 }),
-                text: Some(Content {
-                    charset: Some(String::from("utf-8")),
-                    data: String::from_utf8(mail_txt).unwrap(),
-                }),
+                text: Default::default(),
             },
-            subject: Content {
-                charset: Some(String::from("utf-8")),
-                data: subject,
-            },
+            subject: Content { charset: Default::default(), data: subject },
         },
         reply_to_addresses: Some(vec![original_sender]),
         return_path: Default::default(),
@@ -315,10 +307,10 @@ mod tests {
     }
 
     #[tokio::test]
-    // #[ignore = "skipping integration because of IAM requirements"]
-    async fn handler_handles() {
-        env::set_var("TO_EMAIL", "test@nyah.dev");
-        env::set_var("FROM_EMAIL", "onions@suya.io");
+    #[ignore = "skipping integration because of IAM requirements"]
+    async fn handler_with_success() {
+        env::set_var("TO_EMAIL", "nyah@hey.com");
+        env::set_var("FROM_EMAIL", "test@nyah.dev");
         let test_event = read_test_event(String::from("test_event.json"));
 
         assert_eq!(
@@ -331,9 +323,10 @@ mod tests {
     }
 
     #[tokio::test]
+    // #[ignore = "skipping integration because of IAM requirements"]
     async fn handler_with_black_listed_email() {
         env::set_var("TO_EMAIL", "test@nyah.dev");
-        env::set_var("FROM_EMAIL", "onions@suya.io");
+        env::set_var("FROM_EMAIL", "fufu@achu.soup");
         env::set_var("BLACK_LIST", "achu.soup");
         let test_event = read_test_event(String::from("test_event.json"));
 
