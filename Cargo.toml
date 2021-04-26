@@ -22,6 +22,7 @@ overflow-checks = true
 panic 			= "abort"
 
 [dependencies]
+charset = "0.1.2"
 clippy = "0.0.302"
 lambda_runtime = "0.3.0"
 lazy_static = "1.4.0"
