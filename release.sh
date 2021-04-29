@@ -17,4 +17,4 @@ terraform -chdir=terraform plan
 terraform -chdir=terraform apply -auto-approve
 
 echo ">>>>>Release complete<<<<"
-set -eux
+set +eux
