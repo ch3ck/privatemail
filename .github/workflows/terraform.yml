@@ -3,11 +3,15 @@
 name: Release new Crate & Provision Infrastructure
 
 on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Reason for deployment
+        required: true
+
   push:
-    branches:
-      - "!*"
     tags:
-      - "v*"
+      - "*"
 
 jobs:
   publish-crate-on-new-release:
