@@ -1,4 +1,4 @@
-# GitHub Actions workflow to deploy Lambda functions with RUST runtime
+# Actions workflow to build code and run unit tests
 # Author: Nyah Check
 name: Build & Run Tests
 
