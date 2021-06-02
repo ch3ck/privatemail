@@ -12,9 +12,11 @@ Forward emails from verified domains on SES to SES `verified email`.
 
 ## Description
 
-A RUST service that uses the inbound/outbound capabilities of AWS SES to forwared emails from verfied domains to a verified email address.
+A RUST service that uses the inbound/outbound capabilities of AWS SES to forward emails from verified domains to an SES `verified` email address.
 For example, if an email is sent from `john@doe.example` to `achu@fufu.soup` is forwarded to a verified email `onions@suya.io`.
-This service processes the `From` and `Reply-To` headers set as follows:
+`privatemail` also add capability to `blacklist` certain emails from coming to you.
+
+Example email and how the `From` and `Reply-To` headers are set:
 ```
 From: John Doe <achu@fufu.soup>
 Reply-To: john@doe.example
@@ -43,7 +45,7 @@ $ cargo build
 $ cargo test
 ```
 
-### Infrastructure Provisioning
+### Provision Infrastructure with Terraform
 1. Verify your domain and email address on SES before running this
 2. Create a terraform Token which has admin access to your AWS Account
 3. Build and generate your Lambda.zip in the terraform directory
@@ -58,7 +60,7 @@ $ terraform apply
 Alternately, you can run the `release.sh` and it builds your code and provisions your infrastructure.
 
 ## Contributing
-We would appreciate your contributions, all PRs are wellcome. Please see [CONTRIBUTING.md]() for more information.
+We appreciate your contributions; all PRs are welcomed. Please see [CONTRIBUTING.md]() for more information.
 
 
 ## Deployment :rocket:
@@ -68,9 +70,9 @@ We would appreciate your contributions, all PRs are wellcome. Please see [CONTRI
 $ bash release.sh
 ```
 
-### CI Deployment
+### CI / CD (GitHub Actions)
 
-Set up the necessary keys on actions
+Set up the following GitHub secrets for actions worfklows to work properly
 ```bash
 FROM_EMAIL
 TF_API_TOKEN
