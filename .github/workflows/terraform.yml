@@ -1,4 +1,4 @@
-# GitHub Actions workflow to create AWS resources for SES Lambda
+# Actions workflow to create bootstrap binary, provision infrastructure and release crates if necessary
 # Author: Nyah Check
 name: Release new Crate & Provision Infrastructure
 
