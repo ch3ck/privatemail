@@ -164,6 +164,7 @@ resource "aws_lambda_function" "ses-email-forward-lambda" {
 
   source_code_hash = filebase64sha256("lambda.zip")
   runtime          = "provided"
+  version          = 1
 
   # cloudwatch logging
   depends_on = [
