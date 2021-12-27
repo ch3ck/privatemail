@@ -29,6 +29,7 @@
 #![allow(clippy::field_reassign_with_default)]
 use config::PrivatEmailConfig;
 
+use aws_lambda_events::event::ses::SimpleEmailEvent;
 use aws_lambda_events::event::sns::SnsEvent;
 use lambda_runtime::{Context, Error};
 use mailparse::*;
@@ -36,7 +37,7 @@ use rusoto_core::Region;
 use rusoto_ses::{
     Body, Content, Destination, Message, SendEmailRequest, Ses, SesClient,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
 use std::fmt::Debug;
@@ -85,6 +86,13 @@ impl std::fmt::Display for LambdaResponse {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct EmailContent {
+    #[serde(rename = "notificationType")]
+    notification_type: String,
+    content: String,
+}
+
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
 pub(crate) async fn privatemail_handler(
@@ -104,13 +112,12 @@ pub(crate) async fn privatemail_handler(
     // Initialize the PrivatEmailConfig object
     let email_config = PrivatEmailConfig::new_from_env();
 
-    // Fetch request payload
-    let ses_mail = &event.records[0].sns.
-    
-    // ** CAST SNS STRINGIFIED MAIL TO SESEMAILEVENTmail;
+    // Fetch ses request payload from sns message
+    let ses_mail: SimpleEmailEvent =
+        serde_json::from_str(&event.records[0].sns.message.as_ref().unwrap())?;
 
     // skip spam messages
-    let ses_receipt = &event.records[0].sns.receipt;
+    let ses_receipt = &ses_mail.records[0].ses.receipt;
     if ses_receipt.spam_verdict.status.as_ref().unwrap() == "FAIL"
         || ses_receipt.virus_verdict.status.as_ref().unwrap() == "FAIL"
     {
@@ -120,15 +127,27 @@ pub(crate) async fn privatemail_handler(
     }
 
     // Rewrite Email From header to contain sender's name with forwarder's email address
-    let original_sender: String =
-        ses_mail.common_headers.return_path.as_ref().unwrap().to_string();
-    let subject: String =
-        ses_mail.common_headers.subject.as_ref().unwrap().to_string();
+    let original_sender: String = ses_mail.records[0]
+        .ses
+        .mail
+        .common_headers
+        .return_path
+        .as_ref()
+        .unwrap()
+        .to_string();
+    let subject: String = ses_mail.records[0]
+        .ses
+        .mail
+        .common_headers
+        .subject
+        .as_ref()
+        .unwrap()
+        .to_string();
 
-    // parse email content **** TBD ***
-    let mem = ses_receipt.action.message.as_ref().unwrap();
-
-    let parsed_mail = parse_mail(&mem.as_bytes()).unwrap();
+    // parse email content
+    let raw_mail: EmailContent =
+        serde_json::from_str(&event.records[0].sns.message.as_ref().unwrap())?;
+    let parsed_mail = parse_mail(&raw_mail.content.as_bytes()).unwrap();
     let mail_content = parsed_mail.subparts[1].get_body_raw().unwrap();
     let msg_body = charset::decode_latin1(&mail_content).to_string();
     trace!("HTML content: {:#?}", mail_content);
@@ -227,7 +246,7 @@ mod tests {
     }
 
     #[tokio::test]
-    // #[ignore = "skipping integration because of IAM requirements"]
+    #[ignore = "skipping integration because of IAM requirements"]
     async fn handler_with_black_listed_email() {
         env::set_var("TO_EMAIL", "test@nyah.dev");
         env::set_var("FROM_EMAIL", "fufu@achu.soup");
