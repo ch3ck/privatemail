@@ -9,7 +9,6 @@
 //! GPG signature verification.
 
 //! Configuration struct for `PrivatEmail`
-#![allow(clippy::style)]
 use serde::Serialize;
 use std::env;
 
