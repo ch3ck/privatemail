@@ -805,7 +805,7 @@ checksum = "ed0cfbc8191465bed66e1718596ee0b0b35d5ee1f41c5df2189d0fe8bde535ba"
 
 [[package]]
 name = "privatemail"
-version = "1.2.0"
+version = "0.1.0"
 dependencies = [
  "aws_lambda_events",
  "charset",
