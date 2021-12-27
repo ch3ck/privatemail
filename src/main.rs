@@ -9,7 +9,6 @@
 //!
 //! Authors:
 //! - Nyah Check <hello@nyah.dev>
-#![allow(clippy::style)]
 mod lib;
 use lambda_runtime::{handler_fn, Error};
 
