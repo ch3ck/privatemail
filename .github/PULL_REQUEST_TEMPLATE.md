@@ -1,22 +1,18 @@
-**IMPORTANT: Please do not create a Pull Request without creating an issue first.**
+## Proposed changes
+Describe the *big picture* reason for your PR.
 
-*Any change needs to be reviewed before it's merged*
+## Checklist
 
-## Description
-<!-- Please provide enough information so that others can review your pull request -->
+Please review the following checklist before submitting a PR:
 
-Explain the **details** for making this change. What existing problem does the pull request solve?
+- [ ] **CONSIDER** adding a unit test to demonstrate your PR resolves an issue
+- [ ] **DO** keep PRs small for easy review
+- [ ] **DO** make sure unit tests pass
+- [ ] **DO** ensure no compiler warnings are triggered
+- [ ] **AVOID** breaking the CI builds
 
-<!-- Example: When "Adding a function to do X", explain why it is necessary to have a way to do X. -->
-
-### Issue Number
-<!-- Put `closes #XXXX` in your comment to auto-close the issue that your PR fixes (if such). -->
-
-## Test Plan **required**
-
-Demonstrate the code is solid. ( Exact commands you ran and their output, screenshots / videos if the pull request changes UI.)
-
-<!-- Make sure tests pass on both Travis and Circle CI. -->
+## Other comments
+Any other comments you might have.
 
 ## Reviewers
 <!-- add reviewers -->
