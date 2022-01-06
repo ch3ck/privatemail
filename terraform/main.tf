@@ -56,6 +56,7 @@ data "aws_iam_policy_document" "ses_email_forward_policy_document" {
 
     actions = [
       "ses:SendEmail",
+      "ses:SendRawEmail",
     ]
 
     resources = [
