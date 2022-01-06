@@ -188,7 +188,7 @@ pub(crate) async fn privatemail_handler(
     let subject: String = ses_mail.mail.common_headers.subject.to_string();
 
     // parse email content
-    let parsed_mail = parse_mail(&ses_mail.content.as_bytes()).unwrap();
+    let parsed_mail = parse_mail(ses_mail.content.as_bytes()).unwrap();
     let mail_content = parsed_mail.subparts[1].get_body_raw().unwrap();
     let msg_body = charset::decode_latin1(&mail_content).to_string();
     trace!("HTML content: {:#?}", mail_content);
