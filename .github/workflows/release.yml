@@ -19,7 +19,7 @@ jobs:
     name: "Publish crate on Release"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
             toolchain: stable
@@ -31,7 +31,7 @@ jobs:
     name: build musl-rust bootstrap binary
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           rust-version: stable
       - name: Fetch musl-rust image
