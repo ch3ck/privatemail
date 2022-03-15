@@ -51,7 +51,7 @@ impl PrivatEmailConfig {
     pub fn new_from_env() -> Self {
         let b_list = env::var("BLACK_LIST").unwrap_or_default();
         let black_list =
-            b_list.split(',').map(|x| x.replace(" ", "")).collect();
+            b_list.split(',').map(|x| x.replace(' ', "")).collect();
 
         PrivatEmailConfig {
             from_email: env::var("FROM_EMAIL")
@@ -71,7 +71,7 @@ impl PrivatEmailConfig {
     {
         let b_list_vec = black_list.to_string();
         let b_list: Vec<String> =
-            b_list_vec.split(',').map(|x| x.replace(" ", "")).collect();
+            b_list_vec.split(',').map(|x| x.replace(' ', "")).collect();
         PrivatEmailConfig {
             from_email: from_email.to_string(),
             to_email: to_email.to_string(),
