@@ -1,7 +1,7 @@
 [package]
 name        = "privatemail"
 description = "Service to forward custom emails to personal email server"
-version     = "0.1.0"
+version     = "0.2.0"
 authors     = ["Nyah Check <hello@nyah.dev>"]
 license     = "MIT"
 homepage    = "https://github.com/ch3ck"
@@ -20,6 +20,7 @@ path = "src/config.rs"
 [profile.release]
 overflow-checks = true
 panic 			= "abort"
+strip = "debuginfo"
 
 [dependencies]
 charset = "0.1.3"
