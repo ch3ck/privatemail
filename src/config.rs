@@ -93,8 +93,8 @@ mod tests {
             String::from("test_to"),
             String::from("fake@email.t, second@fake.email"),
         );
-        assert_eq!(new_config.from_email.contains("test_from"), true);
-        assert_eq!(new_config.to_email.contains("test_to"), true);
+        assert!(new_config.from_email.contains("test_from"));
+        assert!(new_config.to_email.contains("test_to"));
         assert_eq!(
             new_config.black_list.unwrap(),
             ["fake@email.t", "second@fake.email"]
@@ -103,9 +103,9 @@ mod tests {
     #[test]
     fn test_default_privatemail_config() {
         let new_config = PrivatEmailConfig::default();
-        assert_eq!(new_config.from_email.contains("hello@nyah.dev"), true);
-        assert_eq!(new_config.to_email.contains("nyah@hey.com"), true);
-        assert_eq!(new_config.black_list.is_none(), true);
+        assert!(new_config.from_email.contains("hello@nyah.dev"));
+        assert!(new_config.to_email.contains("nyah@hey.com"));
+        assert!(new_config.black_list.is_none());
     }
 
     #[test]
@@ -114,8 +114,8 @@ mod tests {
         env::set_var("TO_EMAIL", "test_to");
 
         let new_config = PrivatEmailConfig::new_from_env();
-        assert_eq!(new_config.from_email.contains("test_from"), true);
-        assert_eq!(new_config.to_email.contains("test_to"), true);
+        assert!(new_config.from_email.contains("test_from"));
+        assert!(new_config.to_email.contains("test_to"));
         assert_eq!(new_config.black_list.unwrap(), [""]);
     }
 }
