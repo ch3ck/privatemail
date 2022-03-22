@@ -13,6 +13,9 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: write
+
 
 jobs:
   publish-crate-on-new-release:
@@ -63,7 +66,13 @@ jobs:
       - name: create-new-release
         uses: softprops/action-gh-release@v1
         with:
+          body_path: CHANGELOG.md
+          generate_release_notes: true
           files: |
+            CHANGELOG.md
+            README.md
+            SECURITY.md
+            LICENSE
             lambda.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
