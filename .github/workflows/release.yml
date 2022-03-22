@@ -27,6 +27,23 @@ jobs:
       - uses: katyo/publish-crates@v1
         with:
             registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  create-new-github-release:
+    name: release ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64-unknown-linux-musl]
+    steps:
+      - uses: actions/checkout@master
+      - name: Compile and release
+        uses: rust-build/rust-build.action@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUSTTARGET: ${{ matrix.target }}
+          EXTRA_FILES: "README.md CHANGELOG.md SECURITY.md LICENSE"
+
   release-new-musl-binary:
     name: build musl-rust bootstrap binary
     runs-on: ubuntu-latest
