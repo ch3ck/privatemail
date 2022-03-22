@@ -251,9 +251,8 @@ pub(crate) async fn privatemail_handler(
 mod tests {
     use super::*;
     use lambda_runtime::Context;
-    use serde_json;
+    use std::fs;
     use std::path::PathBuf;
-    use std::{env, fs};
 
     fn read_test_event(file_name: String) -> Value {
         // Open the file in read-only mode with buffer.
