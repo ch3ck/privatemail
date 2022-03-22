@@ -27,7 +27,7 @@
 //! }
 //! ```
 use config::PrivatEmailConfig;
-use lambda_runtime::{Context, Error};
+use lambda_runtime::{Error, LambdaEvent};
 use mailparse::parse_mail;
 use rusoto_core::Region;
 use rusoto_ses::{
@@ -137,9 +137,10 @@ pub struct Verdict {
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
 pub(crate) async fn privatemail_handler(
-    event: Value,
-    ctx: Context,
+    lambda_event: LambdaEvent<Value>,
 ) -> Result<LambdaResponse, Error> {
+    let (event, ctx) = lambda_event.into_parts();
+
     // install global collector configured based on RUST_LOG env var
     let xray_trace_id = &ctx.xray_trace_id.clone();
     env::set_var("_X_AMZN_TRACE_ID", xray_trace_id);
@@ -249,6 +250,7 @@ pub(crate) async fn privatemail_handler(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use lambda_runtime::Context;
     use serde_json;
     use std::path::PathBuf;
     use std::{env, fs};
@@ -278,10 +280,13 @@ mod tests {
         let test_event = read_test_event(String::from("test_event.json"));
 
         assert_eq!(
-            privatemail_handler(test_event, Context::default())
-                .await
-                .expect("expected Ok(_) response")
-                .status_code,
+            privatemail_handler(LambdaEvent {
+                payload: test_event,
+                context: Context::default()
+            })
+            .await
+            .expect("expected Ok(_) response")
+            .status_code,
             200
         )
     }
@@ -295,10 +300,13 @@ mod tests {
         let test_event = read_test_event(String::from("test_event.json"));
 
         assert_eq!(
-            privatemail_handler(test_event, Context::default())
-                .await
-                .expect("expected Ok(_) response")
-                .status_code,
+            privatemail_handler(LambdaEvent {
+                payload: test_event,
+                context: Context::default()
+            })
+            .await
+            .expect("expected Ok(_) response")
+            .status_code,
             200
         )
     }

@@ -10,11 +10,11 @@
 //! Authors:
 //! - Nyah Check <hello@nyah.dev>
 mod lib;
-use lambda_runtime::{handler_fn, Error};
+use lambda_runtime::{service_fn, Error};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let privatemail_handler = handler_fn(lib::privatemail_handler);
+    let privatemail_handler = service_fn(lib::privatemail_handler);
     lambda_runtime::run(privatemail_handler).await?;
     Ok(())
 }
