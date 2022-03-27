@@ -1,4 +1,4 @@
-# Actions workflow to release new crates and binaries
+# Actions workflow to release new crates, binaries and terraform
 # Author: Nyah Check
 name: Release new binaries
 
@@ -31,25 +31,10 @@ jobs:
         with:
             registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
-  create-new-github-release:
-    name: release ${{ matrix.target }}
+  release-and-deploy-new-musl-binary:
+    name: release new musl binary and deploy
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [x86_64-unknown-linux-musl]
-    steps:
-      - uses: actions/checkout@master
-      - name: Compile and release
-        uses: rust-build/rust-build.action@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RUSTTARGET: ${{ matrix.target }}
-          EXTRA_FILES: "README.md CHANGELOG.md SECURITY.md LICENSE"
-
-  release-new-musl-binary:
-    name: build musl-rust bootstrap binary
-    runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v3
         with:
@@ -76,3 +61,25 @@ jobs:
             lambda.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+        env:
+          TF_VAR_from_email: ${{ secrets.TO_EMAIL }}
+          TF_VAR_to_email: ${{ secrets.FROM_EMAIL }}
+      - name: Terraform Format
+        id: fmt
+        run: terraform -chdir=terraform fmt -check
+      - name: Terraform init
+        id: init
+        run: terraform -chdir=terraform init
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -json
+      - name: Terraform Plan
+        run: terraform -chdir=terraform plan
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: terraform -chdir=terraform apply -auto-approve
