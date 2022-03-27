@@ -1,9 +1,8 @@
 # privatemail
 
-[![Rust](https://github.com/ch3ck/privatemail/actions/workflows/rust.yml/badge.svg?branch=master)](https://github.com/ch3ck/privatemail/actions/workflows/rust.yml)
-[![Run Security Audit](https://github.com/ch3ck/privatemail/actions/workflows/security.yml/badge.svg)](https://github.com/ch3ck/privatemail/actions/workflows/security.yml)
-[![Deploy new email service](https://github.com/ch3ck/privatemail/actions/workflows/deploy.yml/badge.svg)](https://github.com/ch3ck/privatemail/actions/workflows/deploy.yml)
-[![supply-chain security](https://github.com/ch3ck/privatemail/actions/workflows/scorecards.yml/badge.svg)](https://github.com/ch3ck/privatemail/actions/workflows/scorecards.yml)
+[![CI Build](https://github.com/ch3ck/privatemail/actions/workflows/ci.yml/badge.svg)](https://github.com/ch3ck/privatemail/actions/workflows/ci.yml)
+[![Releases](https://github.com/ch3ck/privatemail/actions/workflows/release.yml/badge.svg)](https://github.com/ch3ck/privatemail/actions/workflows/release.yml)
+[![Security audit](https://github.com/ch3ck/privatemail/actions/workflows/audit.yml/badge.svg)](https://github.com/ch3ck/privatemail/actions/workflows/audit.yml)
 [![forthebadge](https://forthebadge.com/images/badges/contains-technical-debt.svg)](https://crates.io/crates/privatemail)
 
 Forward emails from verified domains on SES to SES `verified email`.
