@@ -1,4 +1,4 @@
-name: Scorecards supply-chain security
+name: Security audits (Scorecards supply-chain security, Cargo audit)
 on: 
   # Only the default branch is supported.
   branch_protection_rule:
@@ -11,6 +11,14 @@ on:
 permissions: read-all
 
 jobs:
+  run-security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/audit-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   analysis:
     name: Scorecards analysis
     runs-on: ubuntu-latest
