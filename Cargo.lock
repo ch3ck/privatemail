@@ -838,7 +838,7 @@ dependencies = [
  "charset",
  "lambda_runtime",
  "mailparse",
- "rusoto_core 0.47.0",
+ "rusoto_core",
  "rusoto_ses",
  "serde",
  "serde_json",
@@ -931,31 +931,6 @@ dependencies = [
 
 [[package]]
 name = "rusoto_core"
-version = "0.47.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b4f000e8934c1b4f70adde180056812e7ea6b1a247952db8ee98c94cd3116cc"
-dependencies = [
- "async-trait",
- "base64",
- "bytes",
- "crc32fast",
- "futures",
- "http",
- "hyper",
- "hyper-tls",
- "lazy_static",
- "log",
- "rusoto_credential 0.47.0",
- "rusoto_signature 0.47.0",
- "rustc_version",
- "serde",
- "serde_json",
- "tokio",
- "xml-rs",
-]
-
-[[package]]
-name = "rusoto_core"
 version = "0.48.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1db30db44ea73551326269adcf7a2169428a054f14faf9e1768f2163494f2fa2"
@@ -970,31 +945,13 @@ dependencies = [
  "hyper-tls",
  "lazy_static",
  "log",
- "rusoto_credential 0.48.0",
- "rusoto_signature 0.48.0",
+ "rusoto_credential",
+ "rusoto_signature",
  "rustc_version",
  "serde",
  "serde_json",
  "tokio",
  "xml-rs",
-]
-
-[[package]]
-name = "rusoto_credential"
-version = "0.47.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a46b67db7bb66f5541e44db22b0a02fed59c9603e146db3a9e633272d3bac2f"
-dependencies = [
- "async-trait",
- "chrono",
- "dirs-next",
- "futures",
- "hyper",
- "serde",
- "serde_json",
- "shlex",
- "tokio",
- "zeroize",
 ]
 
 [[package]]
@@ -1024,35 +981,9 @@ dependencies = [
  "async-trait",
  "bytes",
  "futures",
- "rusoto_core 0.48.0",
+ "rusoto_core",
  "serde_urlencoded",
  "xml-rs",
-]
-
-[[package]]
-name = "rusoto_signature"
-version = "0.47.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6264e93384b90a747758bcc82079711eacf2e755c3a8b5091687b5349d870bcc"
-dependencies = [
- "base64",
- "bytes",
- "chrono",
- "digest",
- "futures",
- "hex",
- "hmac",
- "http",
- "hyper",
- "log",
- "md-5",
- "percent-encoding",
- "pin-project-lite",
- "rusoto_credential 0.47.0",
- "rustc_version",
- "serde",
- "sha2",
- "tokio",
 ]
 
 [[package]]
@@ -1074,7 +1005,7 @@ dependencies = [
  "md-5",
  "percent-encoding",
  "pin-project-lite",
- "rusoto_credential 0.48.0",
+ "rusoto_credential",
  "rustc_version",
  "serde",
  "sha2",
