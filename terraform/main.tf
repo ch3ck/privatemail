@@ -27,9 +27,13 @@ resource "aws_s3_bucket" "ses-bucket" {
     Name        = var.bucket
     Environment = "personal"
   }
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "ses-bucket-versioning" {
+  bucket = aws_s3_bucket.ses-bucket.id
+
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 
