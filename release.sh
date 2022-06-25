@@ -8,7 +8,7 @@ rustup target add x86_64-unknown-linux-musl
 docker pull clux/muslrust
 docker run -v $PWD:/volume --rm -t clux/muslrust cargo build --release --target x86_64-unknown-linux-musl
 zip -j lambda.zip ./target/x86_64-unknown-linux-musl/release/bootstrap
-cp lambda.zip terraform/
+ln -s lambda.zip terraform/lambda.zip
 
 echo "Terraform Provisioning"
 terraform -chdir=terraform init

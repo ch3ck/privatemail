@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2022-06-24
+
+### Security
+- Add terraform security scans to CI.
+
+### Changed
+- Use aws_s3_bucket_versioning module for versioning objects
+- Update Cargo packages to latest versions
+
+
 
 ## [Released]
 
@@ -42,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Full Changelog**: https://github.com/ch3ck/privatemail/commits/v0.2.0
 
 
-## [0.1.0] - 2022-27-01
+## [0.1.0] - 2021-27-01
 
 ### Added
 
