@@ -3,7 +3,7 @@ cargo-features = ["strip"]
 [package]
 name        = "privatemail"
 description = "Service to forward custom emails to personal email server"
-version     = "0.2.1"
+version     = "0.2.2"
 authors     = ["Nyah Check <hello@nyah.dev>"]
 license     = "MIT"
 homepage    = "https://github.com/ch3ck"
