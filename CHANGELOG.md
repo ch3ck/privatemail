@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [Released]
+
 ## [0.2.1] - 2022-06-24
 
 ### Security
@@ -16,9 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use aws_s3_bucket_versioning module for versioning objects
 - Update Cargo packages to latest versions
 
-
-
-## [Released]
 
 ## [0.2.0] - 2022-03-21
 
