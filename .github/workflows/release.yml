@@ -59,6 +59,7 @@ jobs:
       - name: package lambda zip for release
         run: |
           zip -j lambda.zip ./target/x86_64-unknown-linux-musl/release/bootstrap
+          ln -s lambda.zip terraform/lambda.zip
       - name: create-new-release
         uses: softprops/action-gh-release@v1
         with:
