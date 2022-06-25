@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Full Changelog**: https://github.com/ch3ck/privatemail/commits/v0.2.0
 
 
-## [0.1.0] - 2021-27-01
+## [0.1.0] - 2022-27-01
 
 ### Added
 
