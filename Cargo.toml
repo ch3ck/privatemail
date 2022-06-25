@@ -24,9 +24,8 @@ name = "config"
 path = "src/config.rs"
 
 [profile.release]
-overflow-checks = true
 panic 			= "abort"
-strip           = "debuginfo"
+
 
 [dependencies]
 charset = "0.1"

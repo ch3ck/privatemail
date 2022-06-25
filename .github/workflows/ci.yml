@@ -3,7 +3,7 @@
 name: Build & Run Tests
 
 on: [push, pull_request]
-  
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -29,7 +29,6 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
