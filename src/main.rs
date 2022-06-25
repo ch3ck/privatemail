@@ -1,7 +1,7 @@
 //! -*- mode: rust; -*-
 //!
 //! This file is part of privatemail crate.
-//! Copyright (c) 2021 Nyah Check
+//! Copyright (c) 2022 Nyah Check
 //! See LICENSE for licensing information.
 //!
 //! privatemail - This service is for forwarding raw from SES.
