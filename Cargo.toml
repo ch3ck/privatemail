@@ -29,11 +29,11 @@ panic 			= "abort"
 
 [dependencies]
 charset = "0.1"
-lambda_runtime = "0.5"
+lambda_runtime = "0.6"
 mailparse = "0.13"
 rusoto_core = "0.48"
 rusoto_ses = "0.48"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-tokio = { version = "1.19", features = ["macros", "io-util", "sync", "rt-multi-thread"] }
+tokio = { version = "1.21", features = ["macros", "io-util", "sync", "rt-multi-thread"] }
 tracing = { version = "0.1", features = ["log"] }
