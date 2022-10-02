@@ -29,7 +29,7 @@ panic 			= "abort"
 
 [dependencies]
 charset = "0.1"
-lambda_runtime = "0.5"
+lambda_runtime = "0.6"
 mailparse = "0.13"
 rusoto_core = "0.48"
 rusoto_ses = "0.48"
