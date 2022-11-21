@@ -6,15 +6,12 @@ on: [push, pull_request]
 
 env:
   CARGO_TERM_COLOR: always
+  RUST_VERSION: 1.65.0
 
 
 jobs:
   build-and-run-tests:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        rust:
-          - stable
     steps:
       - uses: actions/checkout@v3
 
@@ -31,14 +28,10 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: ${{ matrix.rust }}
+          toolchain: ${{ env.RUST_VERSION }}
           override: true
           components: rustfmt, clippy
-      
-      - uses: actions-rs/cargo@v1
-        with:
-          command: check
-      
+  
       - uses: actions-rs/cargo@v1
         with:
           command: test

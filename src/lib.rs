@@ -27,7 +27,9 @@
 //! }
 //! ```
 
+#![forbid(unsafe_code)]
 #![allow(clippy::derive_partial_eq_without_eq)]
+
 use config::PrivatEmailConfig;
 use lambda_runtime::{Error, LambdaEvent};
 use mailparse::parse_mail;
@@ -144,7 +146,7 @@ pub(crate) async fn privatemail_handler(
     let (event, ctx) = lambda_event.into_parts();
 
     // install global collector configured based on RUST_LOG env var
-    let xray_trace_id = &ctx.xray_trace_id.clone();
+    let xray_trace_id = &ctx.xray_trace_id.as_ref().unwrap();
     env::set_var("_X_AMZN_TRACE_ID", xray_trace_id);
 
     // Enable Cloudwatch error logging at runtime

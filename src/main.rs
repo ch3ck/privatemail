@@ -9,12 +9,15 @@
 //!
 //! Authors:
 //! - Nyah Check <hello@nyah.dev>
-mod lib;
+
+pub mod lib;
+
+use crate::lib::privatemail_handler;
 use lambda_runtime::{service_fn, Error};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let privatemail_handler = service_fn(lib::privatemail_handler);
+    let privatemail_handler = service_fn(privatemail_handler);
     lambda_runtime::run(privatemail_handler).await?;
     Ok(())
 }
