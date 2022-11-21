@@ -1,7 +1,7 @@
 # privatemail
 
-[![CI Build](https://github.com/ch3ck/privatemail/actions/workflows/ci.yml/badge.svg)](https://github.com/ch3ck/privatemail/actions/workflows/ci.yml)
-[![Release new binaries](https://github.com/ch3ck/privatemail/actions/workflows/release.yml/badge.svg?branch=v0.2.2)](https://github.com/ch3ck/privatemail/actions/workflows/release.yml)
+[![Build & Run Tests](https://github.com/ch3ck/privatemail/actions/workflows/ci.yml/badge.svg)](https://github.com/ch3ck/privatemail/actions/workflows/ci.yml)
+[![Release new binaries](https://github.com/ch3ck/privatemail/actions/workflows/release.yml/badge.svg?branch=v0.2.3)](https://github.com/ch3ck/privatemail/actions/workflows/release.yml)
 [![Security audit](https://github.com/ch3ck/privatemail/actions/workflows/audit.yml/badge.svg)](https://github.com/ch3ck/privatemail/actions/workflows/audit.yml)
 [![forthebadge](https://forthebadge.com/images/badges/contains-technical-debt.svg)](https://crates.io/crates/privatemail)
 

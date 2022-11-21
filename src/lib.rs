@@ -12,18 +12,13 @@
 //! Example:
 //!
 //! ```
-//! use privatemail::PrivatEmailConfig;
+//! use crate::lib::config::PrivatEmailConfig;
 //! use serde::{Deserialize, Serialize};
 //!
 //! async fn privatemail_handler() {
 //!     // Initialize PrivatEmailConfig object.
 //!     let email_config = PrivatEmailConfig::default();
 //!
-//!     // Get email recipient and process incoming mail
-//!     ...
-//!
-//!     // Forward to recipent
-//!     ...
 //! }
 //! ```
 

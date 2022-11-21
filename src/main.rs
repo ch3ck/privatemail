@@ -10,8 +10,8 @@
 //! Authors:
 //! - Nyah Check <hello@nyah.dev>
 
-use lib::privatemail_handler;
 use lambda_runtime::{service_fn, Error};
+use lib::privatemail_handler;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
