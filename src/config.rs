@@ -20,7 +20,7 @@ use std::env;
 ///  `from_email`: Original Recipient Email from Verified SES Domain
 ///  `to_email`: Recipient SES verified email address which receives the forwarded email
 ///  `black_list`: Black listed email addresses.
-#[derive(Clone, Debug, PartialEq, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(default)]
 pub struct PrivatEmailConfig {
     /// Original Recipient Email from Verified SES Domain
