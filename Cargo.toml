@@ -1,39 +1,37 @@
-cargo-features = ["strip"]
-
 [package]
-name        = "privatemail"
-description = "Service to forward custom emails to personal email server"
-version     = "0.2.2"
-authors     = ["Nyah Check <hello@nyah.dev>"]
-license     = "MIT"
-homepage    = "https://github.com/ch3ck"
-repository  = "https://github.com/ch3ck/privatemail"
-readme      = "README.md"
-categories  = ["email", "web-programming", "config", "development-tools"]
-keywords    = ["lambda", "aws", "email", "security", "rust"]
-edition     = "2021"
-documentation = "https://docs.rs/privatemail"
+name            = "privatemail"
+description     = "Service to forward custom emails to personal email server"
+version         = "0.2.2"
+authors         = ["Nyah Check <hello@nyah.dev>"]
+license         = "MIT"
+homepage        = "https://github.com/ch3ck"
+repository      = "https://github.com/ch3ck/privatemail"
+readme          = "README.md"
+categories      = ["email", "web-programming", "config", "development-tools"]
+keywords        = ["lambda", "aws", "email", "security", "rust"]
+edition         = "2021"
+documentation   = "https://docs.rs/privatemail"
 
 
 [[bin]]
-name = "bootstrap"
-path = "src/main.rs"
+name            = "bootstrap"
+path            = "src/main.rs"
 
 [lib]
-name = "config"
-path = "src/config.rs"
+name            = "config"
+path            = "src/config.rs"
 
 [profile.release]
 panic 			= "abort"
 
 
 [dependencies]
-charset = "0.1"
-lambda_runtime = "0.6"
-mailparse = "0.13"
-rusoto_core = "0.48"
-rusoto_ses = "0.48"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-tokio = { version = "1.19", features = ["macros", "io-util", "sync", "rt-multi-thread"] }
-tracing = { version = "0.1", features = ["log"] }
+charset         = { version = "0.1" }
+lambda_runtime  = { version = "0.7" }
+mailparse       = { version = "0.13" }
+rusoto_core     = { version = "0.48" }
+rusoto_ses      = { version = "0.48" }
+serde           = { version = "1", features = ["derive"] }
+serde_json      = { version = "1" }
+tokio           = { version = "1.22", features = ["macros", "io-util", "sync", "rt-multi-thread"] }
+tracing         = { version = "0.1", features = ["log"] }
