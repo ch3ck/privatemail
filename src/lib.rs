@@ -26,6 +26,8 @@
 //!     ...
 //! }
 //! ```
+
+#![allow(clippy::derive_partial_eq_without_eq)]
 use config::PrivatEmailConfig;
 use lambda_runtime::{Error, LambdaEvent};
 use mailparse::parse_mail;
