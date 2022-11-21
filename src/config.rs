@@ -9,7 +9,7 @@
 //! GPG signature verification.
 
 //! Configuration struct for `PrivatEmail`
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::env;
 
 /// Config object for `PrivatEmail`.
@@ -20,8 +20,7 @@ use std::env;
 ///  `from_email`: Original Recipient Email from Verified SES Domain
 ///  `to_email`: Recipient SES verified email address which receives the forwarded email
 ///  `black_list`: Black listed email addresses.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
-#[serde(default)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct PrivatEmailConfig {
     /// Original Recipient Email from Verified SES Domain
     pub from_email: String,
