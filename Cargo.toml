@@ -18,8 +18,8 @@ name            = "bootstrap"
 path            = "src/main.rs"
 
 [lib]
-name            = "config"
-path            = "src/config.rs"
+name            = "lib"
+path            = "src/lib.rs"
 
 [profile.release]
 panic 			= "abort"

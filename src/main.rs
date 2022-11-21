@@ -10,9 +10,7 @@
 //! Authors:
 //! - Nyah Check <hello@nyah.dev>
 
-pub mod lib;
-
-use crate::lib::privatemail_handler;
+use lib::privatemail_handler;
 use lambda_runtime::{service_fn, Error};
 
 #[tokio::main]

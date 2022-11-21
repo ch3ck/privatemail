@@ -30,6 +30,8 @@
 #![forbid(unsafe_code)]
 #![allow(clippy::derive_partial_eq_without_eq)]
 
+pub mod config;
+
 use config::PrivatEmailConfig;
 use lambda_runtime::{Error, LambdaEvent};
 use mailparse::parse_mail;
@@ -137,7 +139,7 @@ pub struct Verdict {
 
 /// PrivatEmail_Handler: processes incoming messages from SNS
 /// and forwards to the appropriate recipient email
-pub(crate) async fn privatemail_handler(
+pub async fn privatemail_handler(
     lambda_event: LambdaEvent<Value>,
 ) -> Result<LambdaResponse, Error> {
     let (event, ctx) = lambda_event.into_parts();
