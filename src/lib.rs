@@ -39,10 +39,7 @@ use rusoto_ses::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
-use std::env;
-use std::fmt::Debug;
-
+use std::{collections::HashMap, env, fmt::Debug};
 use tracing::{error, trace};
 
 /// LambdaResponse: The Outgoing response being passed by the Lambda
