@@ -28,7 +28,7 @@ panic 			= "abort"
 [dependencies]
 charset         = { version = "0.1" }
 lambda_runtime  = { version = "0.7" }
-mailparse       = { version = "0.13" }
+mailparse       = { version = "0.14" }
 rusoto_core     = { version = "0.48" }
 rusoto_ses      = { version = "0.48" }
 serde           = { version = "1", features = ["derive"] }
