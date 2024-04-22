@@ -16,6 +16,8 @@ fmt:
 
 .PHONY: lint
 lint:
+	$(CGO) install cargo-audit --features=fix
+	$(CGO) audit fix
 	$(CGO) clippy --fix --allow-staged --allow-dirty
 
 .PHONY: build
@@ -33,7 +35,7 @@ test: build
 .PHONY: publish
 publish:
 	@echo "** WARNING: Publishing requires a valid API token!**"
-	@echo "** Please set the '$CARGO_API_TOKEN' environment variable before publishing. **"
+	@echo "** Please set the '${CARGO_API_TOKEN}' environment variable before publishing. **"
 	$(CGO) build --release
 	$(CGO) publish --quiet
 
