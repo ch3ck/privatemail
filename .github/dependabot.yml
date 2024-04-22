@@ -10,7 +10,7 @@ updates:
       interval: "daily"
     reviewers:
       - "@ch3ck"
-    open-pull-requests-limit: 1
+    open-pull-requests-limit: 10
 
   # Maintain dependencies for Cargo
   - package-ecosystem: "cargo"
@@ -19,13 +19,13 @@ updates:
       interval: "daily"
     reviewers:
       - "@ch3ck"
-    open-pull-requests-limit: 1
+    open-pull-requests-limit: 10
   
   # Maintain dependencies for terraform
   - package-ecosystem: "terraform"
-    directory: "/"
+    directory: "/terraform"
     schedule:
       interval: "daily"
     reviewers:
       - "@ch3ck"
-    open-pull-requests-limit: 1
+    open-pull-requests-limit: 10

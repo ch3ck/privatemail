@@ -1,9 +1,6 @@
 # privatemail
 
-[![Build & Run Tests](https://github.com/ch3ck/privatemail/actions/workflows/ci.yml/badge.svg)](https://github.com/ch3ck/privatemail/actions/workflows/ci.yml)
-[![Release new binaries](https://github.com/ch3ck/privatemail/actions/workflows/release.yml/badge.svg?branch=v0.2.3)](https://github.com/ch3ck/privatemail/actions/workflows/release.yml)
-[![Security audit](https://github.com/ch3ck/privatemail/actions/workflows/audit.yml/badge.svg)](https://github.com/ch3ck/privatemail/actions/workflows/audit.yml)
-[![forthebadge](https://forthebadge.com/images/badges/contains-technical-debt.svg)](https://crates.io/crates/privatemail)
+[![Build & Run Tests](https://github.com/ch3ck/privatemail/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/ch3ck/privatemail/actions/workflows/ci.yml)
 
 Forward emails from verified domains on SES to SES `verified email`.
 

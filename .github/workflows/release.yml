@@ -15,7 +15,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_VERSION: 1.65.0
+  RUST_VERSION: stable
 
 permissions:
   contents: write
@@ -26,7 +26,8 @@ jobs:
     name: "Publish crate on Release"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+  
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -54,8 +55,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v4
+
       - uses: actions/cache@v3
         with:
           path: |
