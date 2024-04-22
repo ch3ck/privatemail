@@ -652,9 +652,9 @@ dependencies = [
 
 [[package]]
 name = "mailparse"
-version = "0.13.8"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cae768a50835557749599277fc59f7c728118724eb34185e8feb633ef266a32"
+checksum = "2d096594926cab442e054e047eb8c1402f7d5b2272573b97ba68aa40629f9757"
 dependencies = [
  "charset",
  "data-encoding",
@@ -873,9 +873,9 @@ dependencies = [
 
 [[package]]
 name = "quoted_printable"
-version = "0.4.6"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20f14e071918cbeefc5edc986a7aa92c425dae244e003a35e1cdddb5ca39b5cb"
+checksum = "79ec282e887b434b68c18fe5c121d38e72a5cf35119b59e54ec5b992ea9c8eb0"
 
 [[package]]
 name = "redox_syscall"
