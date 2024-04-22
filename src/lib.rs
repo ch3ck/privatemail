@@ -196,7 +196,7 @@ pub async fn privatemail_handler(
     for email in
         email_config.black_list.unwrap_or_else(|| panic!("Missing black list"))
     {
-        if !email.as_str().is_empty()
+        if !email.is_empty()
             && original_sender.contains(email.as_str())
         {
             let mut err_msg: String =
