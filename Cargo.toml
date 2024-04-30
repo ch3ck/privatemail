@@ -30,7 +30,7 @@ audit           = { version = "0.7.3" }
 cargo-audit     = { version = "0.20.0" }
 charset         = { version = "0.1" }
 lambda_runtime  = { version = "0.11" }
-mailparse       = { version = "0.14" }
+mailparse       = { version = "0.15" }
 rusoto_core     = { version = "0.48" }
 rusoto_ses      = { version = "0.48" }
 serde           = { version = "1", features = ["derive"] }
