@@ -270,7 +270,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "skipping integration because of IAM requirements"]
     async fn handler_with_success() {
-        env::set_var("TO_EMAIL", "nyah@hey.com");
+        env::set_var("TO_EMAIL", "hello@nyah.dev");
         env::set_var("FROM_EMAIL", "test@nyah.dev");
         let test_event = read_test_event(String::from("test_event.json"));
 

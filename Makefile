@@ -22,6 +22,7 @@ lint:
 
 .PHONY: build
 build: fmt lint
+	$(CGO) update
 	$(CGO) build
 
 .PHONY: clean

@@ -17,12 +17,12 @@ variable "topic" {
 }
 
 variable "from_email" {
-  default     = "hello@nyah.dev"
+  default     = "hi@nyah.dev"
   description = "Original email from which the email was sent to."
 }
 
 variable "to_email" {
-  default     = "nyah@hey.com"
+  default     = "hello@nyah.dev"
   description = "AWS Verified email for forwarding your emails"
 }
 

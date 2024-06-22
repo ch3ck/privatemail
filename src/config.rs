@@ -38,7 +38,7 @@ impl Default for PrivatEmailConfig {
     fn default() -> Self {
         PrivatEmailConfig {
             from_email: String::from("hello@nyah.dev"),
-            to_email: String::from("nyah@hey.com"),
+            to_email: String::from("hello@nyah.dev"),
             black_list: None,
         }
     }
@@ -103,7 +103,7 @@ mod tests {
     fn test_default_privatemail_config() {
         let new_config = PrivatEmailConfig::default();
         assert!(new_config.from_email.contains("hello@nyah.dev"));
-        assert!(new_config.to_email.contains("nyah@hey.com"));
+        assert!(new_config.to_email.contains("hello@nyah.dev"));
         assert!(new_config.black_list.is_none());
     }
 
